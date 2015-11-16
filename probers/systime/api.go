@@ -6,7 +6,6 @@ import (
 )
 
 type prober struct {
-	dir       *tricorder.DirectorySpec
 	idleTime  time.Duration
 	probeTime time.Time
 	upTime    time.Duration

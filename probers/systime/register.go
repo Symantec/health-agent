@@ -7,7 +7,6 @@ import (
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := new(prober)
-	p.dir = dir
 	// TODO(rgooch): Consider dividing this by the number of CPUs before
 	//               exporting.
 	//if err := dir.RegisterMetric("idle-time", &p.idleTime, units.Second,
