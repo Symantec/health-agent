@@ -14,7 +14,7 @@ func register(dir *tricorder.DirectorySpec) *prober {
 	//	"idle time since last boot"); err != nil {
 	//	panic(err)
 	//}
-	if err := dir.RegisterMetric("time", &p.probeTime, units.Second,
+	if err := dir.RegisterMetric("time", &p.probeTime, units.None,
 		"time of last probe"); err != nil {
 		panic(err)
 	}
