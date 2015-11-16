@@ -5,7 +5,6 @@ import (
 )
 
 type prober struct {
-	dir            *tricorder.DirectorySpec
 	oneMinute      float32
 	fiveMinutes    float32
 	fifteenMinutes float32

@@ -7,7 +7,6 @@ import (
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := new(prober)
-	p.dir = dir
 	if err := dir.RegisterMetric("1m", &p.oneMinute, units.None,
 		"load average for the last minute"); err != nil {
 		panic(err)
