@@ -16,6 +16,14 @@ func register(dir *tricorder.DirectorySpec) *prober {
 	if err := p.findGateway(); err != nil {
 		panic(err)
 	}
+	if err := dir.RegisterMetric("gateway-address", &p.gatewayAddress,
+		units.None, "gateway address"); err != nil {
+		panic(err)
+	}
+	if err := dir.RegisterMetric("gateway-interface", &p.gatewayInterfaceName,
+		units.None, "gateway interface"); err != nil {
+		panic(err)
+	}
 	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 10e3)
 	p.gatewayRttDistribution = latencyBucketer.NewDistribution()
 	if err := dir.RegisterMetric("gateway-rtt", p.gatewayRttDistribution,
@@ -44,7 +52,8 @@ func (p *prober) findGateway() error {
 			continue
 		}
 		if destAddr == 0 && flags&0x2 == 0x2 && flags&0x1 == 0x1 {
-			p.gatewayInterface = intToIP(gatewayAddr).String()
+			p.gatewayAddress = intToIP(gatewayAddr).String()
+			p.gatewayInterfaceName = interfaceName
 			return nil
 		}
 	}

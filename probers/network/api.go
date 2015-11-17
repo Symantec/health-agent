@@ -5,7 +5,8 @@ import (
 )
 
 type prober struct {
-	gatewayInterface       string
+	gatewayAddress         string
+	gatewayInterfaceName   string
 	gatewayRttDistribution *tricorder.Distribution
 }
 

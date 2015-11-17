@@ -9,7 +9,7 @@ var pingName string = "ping"
 
 func (p *prober) probe() error {
 	timeStart := time.Now()
-	cmd := exec.Command(pingName, "-c", "1", "-W", "5", p.gatewayInterface)
+	cmd := exec.Command(pingName, "-c", "1", "-W", "5", p.gatewayAddress)
 	if cmd.Run() != nil {
 		return nil
 	}
