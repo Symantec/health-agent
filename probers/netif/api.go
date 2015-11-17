@@ -10,12 +10,24 @@ type prober struct {
 }
 
 type netInterface struct {
-	dir       *tricorder.DirectorySpec
-	rxData    uint64
-	rxPackets uint64
-	txData    uint64
-	txPackets uint64
-	probed    bool
+	dir                 *tricorder.DirectorySpec
+	multicastFrames     uint64
+	rxCompressedPackets uint64
+	rxData              uint64
+	rxDropped           uint64
+	rxErrors            uint64
+	rxFrameErrors       uint64
+	rxOverruns          uint64
+	rxPackets           uint64
+	txCarrierLosses     uint64
+	txCollisionErrors   uint64
+	txCompressedPackets uint64
+	txData              uint64
+	txDropped           uint64
+	txErrors            uint64
+	txOverruns          uint64
+	txPackets           uint64
+	probed              bool
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
