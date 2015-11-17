@@ -25,6 +25,12 @@ func register(dir *tricorder.DirectorySpec) *prober {
 		panic(err)
 	}
 	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 10e3)
+	p.gatewayPingTimeDistribution = latencyBucketer.NewDistribution()
+	if err := dir.RegisterMetric("gateway-ping-time",
+		p.gatewayPingTimeDistribution,
+		units.Millisecond, "ping time to gateway"); err != nil {
+		panic(err)
+	}
 	p.gatewayRttDistribution = latencyBucketer.NewDistribution()
 	if err := dir.RegisterMetric("gateway-rtt", p.gatewayRttDistribution,
 		units.Millisecond, "round-trip time to gateway"); err != nil {

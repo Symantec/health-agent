@@ -5,9 +5,10 @@ import (
 )
 
 type prober struct {
-	gatewayAddress         string
-	gatewayInterfaceName   string
-	gatewayRttDistribution *tricorder.Distribution
+	gatewayAddress              string
+	gatewayInterfaceName        string
+	gatewayPingTimeDistribution *tricorder.Distribution
+	gatewayRttDistribution      *tricorder.Distribution
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
