@@ -6,6 +6,7 @@ import (
 	"github.com/Symantec/health-agent/probers/memory"
 	"github.com/Symantec/health-agent/probers/netif"
 	"github.com/Symantec/health-agent/probers/network"
+	"github.com/Symantec/health-agent/probers/storage"
 	"github.com/Symantec/health-agent/probers/systime"
 	"github.com/Symantec/tricorder/go/tricorder"
 )
@@ -25,6 +26,7 @@ func setupProbers() ([]prober, error) {
 	probers = append(probers, memory.Register(mkdir(topMetricsDir, "memory")))
 	probers = append(probers, netif.Register(mkdir(topMetricsDir, "netif")))
 	probers = append(probers, network.Register(mkdir(topMetricsDir, "network")))
+	probers = append(probers, storage.Register(mkdir(topMetricsDir, "storage")))
 	probers = append(probers, systime.Register(mkdir(topMetricsDir, "")))
 	return probers, nil
 }
