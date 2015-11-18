@@ -24,7 +24,10 @@ func (p *prober) probe() error {
 		return errors.New(fmt.Sprintf("only read %d values from %s",
 			nScanned, filename))
 	}
-	p.idleTime = time.Duration(idleTime * float64(time.Second))
+	if p.numCpus > 0 {
+		p.idleTime = time.Duration(idleTime * float64(time.Second) /
+			float64(p.numCpus))
+	}
 	p.probeTime = time.Now()
 	p.upTime = time.Duration(upTime * float64(time.Second))
 	return nil

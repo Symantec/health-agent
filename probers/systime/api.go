@@ -6,6 +6,7 @@ import (
 )
 
 type prober struct {
+	numCpus   uint64
 	idleTime  time.Duration
 	probeTime time.Time
 	upTime    time.Duration
