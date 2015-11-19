@@ -11,6 +11,7 @@ type prober struct {
 
 type netInterface struct {
 	dir                 *tricorder.DirectorySpec
+	carrier             bool
 	multicastFrames     uint64
 	rxCompressedPackets uint64
 	rxData              uint64
@@ -19,6 +20,7 @@ type netInterface struct {
 	rxFrameErrors       uint64
 	rxOverruns          uint64
 	rxPackets           uint64
+	speed               uint64
 	txCarrierLosses     uint64
 	txCollisionErrors   uint64
 	txCompressedPackets uint64
