@@ -10,6 +10,7 @@ import (
 )
 
 var filename string = "/proc/net/dev"
+var sysfsFilenameFormat string = "/sys/class/net/%s/%s"
 
 func (p *prober) probe() error {
 	for _, netIf := range p.netInterfaces {
@@ -46,6 +47,27 @@ func (p *prober) processNetdevLine(line string) error {
 		if err != nil {
 			return err
 		}
+		hwAddress, err := readSysfsString(netIfName, "address")
+		if err == nil {
+			if err := metricsDir.RegisterMetric("address", &hwAddress,
+				units.None, "hardware (MAC) address"); err != nil {
+				return err
+			}
+		}
+		netIf.carrier, err = readSysfsBool(netIfName, "carrier")
+		if err == nil {
+			if err := metricsDir.RegisterMetric("carrier", &netIf.carrier,
+				units.None, "true if carrier detected"); err != nil {
+				return err
+			}
+		}
+		mtu, err := readSysfsUint64(netIfName, "mtu")
+		if err == nil {
+			if err := metricsDir.RegisterMetric("mtu", &mtu, units.Byte,
+				"Messate Transfer Unit"); err != nil {
+				return err
+			}
+		}
 		if err := metricsDir.RegisterMetric("multicast-frames",
 			&netIf.multicastFrames, units.None,
 			"total multicast frames received or transmitted"); err != nil {
@@ -80,6 +102,14 @@ func (p *prober) processNetdevLine(line string) error {
 		if err := metricsDir.RegisterMetric("rx-packets", &netIf.rxPackets,
 			units.None, "total packets received"); err != nil {
 			return err
+		}
+		netIf.speed, err = readSysfsUint64(netIfName, "speed")
+		if err == nil {
+			netIf.speed *= 1000000 / 8
+			if err := metricsDir.RegisterMetric("speed", &netIf.speed,
+				units.None, "link speed in Bytes/Second"); err != nil {
+				return err
+			}
 		}
 		if err := metricsDir.RegisterMetric("tx-carrier-losses",
 			&netIf.txCarrierLosses, units.None,
@@ -133,5 +163,66 @@ func (p *prober) processNetdevLine(line string) error {
 		return errors.New(fmt.Sprintf("only read %d values from %s",
 			nScanned, line))
 	}
+	netIf.carrier, err = readSysfsBool(netIfName, "carrier")
 	return nil
+}
+
+func readSysfsUint64(netIfName, filename string) (uint64, error) {
+	filename = fmt.Sprintf(sysfsFilenameFormat, netIfName, filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+	var value uint64
+	nScanned, err := fmt.Fscanf(file, "%d", &value)
+	if err != nil {
+		return 0, err
+	}
+	if nScanned < 1 {
+		return 0, errors.New(fmt.Sprintf("only read %d values from: %s",
+			nScanned, filename))
+	}
+	return value, nil
+}
+
+func readSysfsBool(netIfName, filename string) (bool, error) {
+	filename = fmt.Sprintf(sysfsFilenameFormat, netIfName, filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+	var ivalue uint
+	nScanned, err := fmt.Fscanf(file, "%d", &ivalue)
+	if err != nil {
+		return false, err
+	}
+	if nScanned < 1 {
+		return false, errors.New(fmt.Sprintf("only read %d values from: %s",
+			nScanned, filename))
+	}
+	if ivalue == 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func readSysfsString(netIfName, filename string) (string, error) {
+	filename = fmt.Sprintf(sysfsFilenameFormat, netIfName, filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	var value string
+	nScanned, err := fmt.Fscanf(file, "%s", &value)
+	if err != nil {
+		return "", err
+	}
+	if nScanned < 1 {
+		return "", errors.New(fmt.Sprintf("only read %d values from: %s",
+			nScanned, filename))
+	}
+	return value, nil
 }
