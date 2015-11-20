@@ -30,7 +30,7 @@ func doMain() error {
 	runtime.LockOSThread()
 	circularBuffer := logbuf.New(*logbufLines)
 	logger := log.New(circularBuffer, "", log.LstdFlags)
-	probers, err := setupProbers()
+	proberList, err := setupProbers()
 	if err != nil {
 		return err
 	}
@@ -47,17 +47,14 @@ func doMain() error {
 		return err
 	}
 	rpc.HandleHTTP()
+	httpd.AddHtmlWriter(proberList)
 	httpd.AddHtmlWriter(circularBuffer)
 	if err := httpd.StartServer(*portNum); err != nil {
 		return err
 	}
 	for {
 		scanStartTime = time.Now()
-		for _, p := range probers {
-			if err := p.Probe(); err != nil {
-				logger.Println(err)
-			}
-		}
+		proberList.Probe(logger)
 		scanDuration := time.Since(scanStartTime)
 		scanTimeDistribution.Add(scanDuration)
 		time.Sleep(time.Second*time.Duration(*probeInterval) - scanDuration)
