@@ -52,7 +52,8 @@ func (fs *fileSystem) writeHtml(writer io.Writer) {
 	usedPercent := float64(usedBytes) * 100 / float64(fs.size)
 	fmt.Fprintf(writer, "  <tr>\n")
 	fmt.Fprintf(writer, "    <td><center>%s</td>\n", fs.mountPoint)
-	fmt.Fprintf(writer, "    <td><center>%s</td>\n", format.FormatBytes(fs.size))
+	fmt.Fprintf(writer, "    <td><center>%s</td>\n",
+		format.FormatBytes(fs.size))
 	fmt.Fprintf(writer, "    <td><center>%.1f%%</td>\n", usedPercent)
 	fmt.Fprint(writer, "    <td>")
 	fs.writeHtmlBar(writer)
@@ -61,14 +62,37 @@ func (fs *fileSystem) writeHtml(writer io.Writer) {
 }
 
 func (fs *fileSystem) writeHtmlBar(writer io.Writer) {
-	//usedBytes := fs.size - fs.free
-	bgColour := "green"
-	if fs.available < 1 {
-		bgColour = "red"
+	usedBytes := fs.size - fs.free
+	barColour := "green"
+	leftBarWidth := float64(usedBytes) / float64(fs.size)
+	var middleBarWidth, rightBarWidth float64
+	if fs.free < fs.size/1000 {
+		barColour = "red"
+		middleBarWidth = 0
+		rightBarWidth = 0
+	} else if fs.available < 1 {
+		barColour = "orange"
+		middleBarWidth = 0
+		rightBarWidth = 1.0 - leftBarWidth
+	} else {
+		if fs.available < fs.size/4 {
+			barColour = "yellow"
+		}
+		rightBarWidth = float64(fs.free-fs.available) / float64(fs.size)
+		middleBarWidth = 1.0 - leftBarWidth - rightBarWidth
 	}
-	fmt.Fprint(writer, `<table border="0" style="width:200px">`)
+	fmt.Fprint(writer, `<table border="0" style="width:200px"><tr>`)
 	fmt.Fprintf(writer,
-		"<tr><td style=\"width:100%%;background-color:%s\">&nbsp;</td></tr>",
-		bgColour)
-	fmt.Fprint(writer, "</table>")
+		"<td style=\"width:%.1f%%;background-color:%s\">&nbsp;</td>",
+		leftBarWidth*100, barColour)
+	if middleBarWidth > 0 {
+		fmt.Fprintf(writer,
+			"<td style=\"width:%.1f%%\">&nbsp;</td>", middleBarWidth*100)
+	}
+	if rightBarWidth > 0 {
+		fmt.Fprintf(writer,
+			"<td style=\"width:%.1f%%;background-color:%s\">&nbsp;</td>",
+			rightBarWidth*100, "grey")
+	}
+	fmt.Fprint(writer, "</tr></table>")
 }
