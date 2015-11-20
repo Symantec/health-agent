@@ -7,6 +7,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder/units"
 	"os"
 	"strings"
+	"time"
 )
 
 var filename string = "/proc/net/dev"
@@ -43,106 +44,108 @@ func (p *prober) processNetdevLine(line string) error {
 	if netIf == nil {
 		netIf = new(netInterface)
 		p.netInterfaces[netIfName] = netIf
-		metricsDir, err := p.dir.RegisterDirectory(netIfName)
+		var err error
+		netIf.dir, err = p.dir.RegisterDirectory(netIfName)
 		if err != nil {
 			return err
 		}
+		netIf.name = netIfName
 		hwAddress, err := readSysfsString(netIfName, "address")
 		if err == nil {
-			if err := metricsDir.RegisterMetric("address", &hwAddress,
+			if err := netIf.dir.RegisterMetric("address", &hwAddress,
 				units.None, "hardware (MAC) address"); err != nil {
 				return err
 			}
 		}
 		netIf.carrier, err = readSysfsBool(netIfName, "carrier")
 		if err == nil {
-			if err := metricsDir.RegisterMetric("carrier", &netIf.carrier,
+			if err := netIf.dir.RegisterMetric("carrier", &netIf.carrier,
 				units.None, "true if carrier detected"); err != nil {
 				return err
 			}
 		}
 		mtu, err := readSysfsUint64(netIfName, "mtu")
 		if err == nil {
-			if err := metricsDir.RegisterMetric("mtu", &mtu, units.Byte,
+			if err := netIf.dir.RegisterMetric("mtu", &mtu, units.Byte,
 				"Messate Transfer Unit"); err != nil {
 				return err
 			}
 		}
-		if err := metricsDir.RegisterMetric("multicast-frames",
+		if err := netIf.dir.RegisterMetric("multicast-frames",
 			&netIf.multicastFrames, units.None,
 			"total multicast frames received or transmitted"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-compressed-packets",
+		if err := netIf.dir.RegisterMetric("rx-compressed-packets",
 			&netIf.rxCompressedPackets, units.None,
 			"compressed packets received"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-data", &netIf.rxData,
+		if err := netIf.dir.RegisterMetric("rx-data", &netIf.rxData,
 			units.Byte, "bytes received"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-dropped", &netIf.rxDropped,
+		if err := netIf.dir.RegisterMetric("rx-dropped", &netIf.rxDropped,
 			units.None, "receive packets dropped"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-errors", &netIf.rxErrors,
+		if err := netIf.dir.RegisterMetric("rx-errors", &netIf.rxErrors,
 			units.None, "total receive errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-frame-errors",
+		if err := netIf.dir.RegisterMetric("rx-frame-errors",
 			&netIf.rxFrameErrors, units.None,
 			"receive framing errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-overruns", &netIf.rxOverruns,
+		if err := netIf.dir.RegisterMetric("rx-overruns", &netIf.rxOverruns,
 			units.None, "receive overrun errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("rx-packets", &netIf.rxPackets,
+		if err := netIf.dir.RegisterMetric("rx-packets", &netIf.rxPackets,
 			units.None, "total packets received"); err != nil {
 			return err
 		}
 		netIf.speed, err = readSysfsUint64(netIfName, "speed")
 		if err == nil {
 			netIf.speed *= 1000000 / 8
-			if err := metricsDir.RegisterMetric("speed", &netIf.speed,
+			if err := netIf.dir.RegisterMetric("speed", &netIf.speed,
 				units.None, "link speed in Bytes/Second"); err != nil {
 				return err
 			}
 		}
-		if err := metricsDir.RegisterMetric("tx-carrier-losses",
+		if err := netIf.dir.RegisterMetric("tx-carrier-losses",
 			&netIf.txCarrierLosses, units.None,
 			"transmit carrier losses"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-collision-errors",
+		if err := netIf.dir.RegisterMetric("tx-collision-errors",
 			&netIf.txCollisionErrors, units.None,
 			"transmit collision errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-compressed-packets",
+		if err := netIf.dir.RegisterMetric("tx-compressed-packets",
 			&netIf.txCompressedPackets, units.None,
 			"compressed packets transmitted"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-data", &netIf.txData,
+		if err := netIf.dir.RegisterMetric("tx-data", &netIf.txData,
 			units.Byte, "bytes transmitted"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-dropped", &netIf.txDropped,
+		if err := netIf.dir.RegisterMetric("tx-dropped", &netIf.txDropped,
 			units.None, "transmit packets dropped"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-errors", &netIf.txErrors,
+		if err := netIf.dir.RegisterMetric("tx-errors", &netIf.txErrors,
 			units.None, "total transmit errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-overruns", &netIf.txOverruns,
+		if err := netIf.dir.RegisterMetric("tx-overruns", &netIf.txOverruns,
 			units.None, "transmit overrun errors"); err != nil {
 			return err
 		}
-		if err := metricsDir.RegisterMetric("tx-packets", &netIf.txPackets,
+		if err := netIf.dir.RegisterMetric("tx-packets", &netIf.txPackets,
 			units.None, "total packets transmitted"); err != nil {
 			return err
 		}
@@ -164,6 +167,17 @@ func (p *prober) processNetdevLine(line string) error {
 			nScanned, line))
 	}
 	netIf.carrier, err = readSysfsBool(netIfName, "carrier")
+	currentTime := time.Now()
+	if !netIf.lastProbeTime.IsZero() {
+		duration := currentTime.Sub(netIf.lastProbeTime)
+		netIf.rxDataRate = uint64(float64(netIf.rxData-netIf.lastRxData) /
+			duration.Seconds())
+		netIf.txDataRate = uint64(float64(netIf.txData-netIf.lastTxData) /
+			duration.Seconds())
+	}
+	netIf.lastProbeTime = currentTime
+	netIf.lastRxData = netIf.rxData
+	netIf.lastTxData = netIf.txData
 	return nil
 }
 

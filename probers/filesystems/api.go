@@ -2,6 +2,7 @@ package filesystems
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
+	"io"
 )
 
 type prober struct {
@@ -10,14 +11,15 @@ type prober struct {
 }
 
 type fileSystem struct {
-	dir       *tricorder.DirectorySpec
-	available uint64
-	device    string
-	free      uint64
-	options   string
-	size      uint64
-	writable  bool
-	probed    bool
+	dir        *tricorder.DirectorySpec
+	mountPoint string
+	available  uint64
+	device     string
+	free       uint64
+	options    string
+	size       uint64
+	writable   bool
+	probed     bool
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
@@ -26,4 +28,8 @@ func Register(dir *tricorder.DirectorySpec) *prober {
 
 func (p *prober) Probe() error {
 	return p.probe()
+}
+
+func (p *prober) WriteHtml(writer io.Writer) {
+	p.writeHtml(writer)
 }
