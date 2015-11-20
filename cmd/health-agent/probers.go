@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Symantec/health-agent/httpd"
 	"github.com/Symantec/health-agent/probers/filesystems"
 	"github.com/Symantec/health-agent/probers/loadavg"
@@ -59,6 +60,7 @@ func (probers proberList) WriteHtml(writer io.Writer) {
 	for _, p := range probers {
 		if htmler, ok := p.(httpd.HtmlWriter); ok {
 			htmler.WriteHtml(writer)
+			fmt.Fprintln(writer, "<br>")
 		}
 	}
 }
