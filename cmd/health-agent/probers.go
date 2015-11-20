@@ -11,6 +11,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
+
 type prober interface {
 	Probe() error
 }
