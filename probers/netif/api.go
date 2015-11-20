@@ -2,6 +2,8 @@ package netif
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
+	"io"
+	"time"
 )
 
 type prober struct {
@@ -11,6 +13,7 @@ type prober struct {
 
 type netInterface struct {
 	dir                 *tricorder.DirectorySpec
+	name                string
 	carrier             bool
 	multicastFrames     uint64
 	rxCompressedPackets uint64
@@ -30,6 +33,11 @@ type netInterface struct {
 	txOverruns          uint64
 	txPackets           uint64
 	probed              bool
+	lastProbeTime       time.Time
+	lastRxData          uint64
+	rxDataRate          uint64
+	lastTxData          uint64
+	txDataRate          uint64
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
@@ -38,4 +46,8 @@ func Register(dir *tricorder.DirectorySpec) *prober {
 
 func (p *prober) Probe() error {
 	return p.probe()
+}
+
+func (p *prober) WriteHtml(writer io.Writer) {
+	p.writeHtml(writer)
 }
