@@ -49,7 +49,7 @@ func (fsList fileSystemsList) Swap(left, right int) {
 
 func (fs *fileSystem) writeHtml(writer io.Writer) {
 	usedBytes := fs.size - fs.free
-	usedPercent := float64(usedBytes) / float64(fs.size)
+	usedPercent := float64(usedBytes) * 100 / float64(fs.size)
 	fmt.Fprintf(writer, "  <tr>\n")
 	fmt.Fprintf(writer, "    <td><center>%s</td>\n", fs.mountPoint)
 	fmt.Fprintf(writer, "    <td><center>%s</td>\n", format.FormatBytes(fs.size))
