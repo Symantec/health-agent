@@ -41,8 +41,8 @@ func (p *prober) writeHtml(writer io.Writer) {
 }
 
 func (netIf *netInterface) writeHtml(writer io.Writer) {
-	rxUtilisation := float64(netIf.rxDataRate / netIf.speed)
-	txUtilisation := float64(netIf.txDataRate / netIf.speed)
+	rxUtilisation := float64(netIf.rxDataRate) / float64(netIf.speed)
+	txUtilisation := float64(netIf.txDataRate) / float64(netIf.speed)
 	fmt.Fprintln(writer, "  <tr>")
 	fmt.Fprintf(writer, "    <td><center>%s</td>\n", netIf.name)
 	fmt.Fprintf(writer, "    <td><center>%.1f%%</td>\n", rxUtilisation*100)
