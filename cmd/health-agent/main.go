@@ -65,7 +65,7 @@ func doMain() error {
 
 func main() {
 	if err := doMain(); err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
