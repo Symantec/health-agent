@@ -7,8 +7,8 @@ import (
 type prober struct {
 	gatewayAddress              string
 	gatewayInterfaceName        string
-	gatewayPingTimeDistribution *tricorder.Distribution
-	gatewayRttDistribution      *tricorder.Distribution
+	gatewayPingTimeDistribution *tricorder.CumulativeDistribution
+	gatewayRttDistribution      *tricorder.CumulativeDistribution
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
