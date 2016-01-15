@@ -35,7 +35,7 @@ func doMain() error {
 		return err
 	}
 	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 100e3)
-	scanTimeDistribution := latencyBucketer.NewDistribution()
+	scanTimeDistribution := latencyBucketer.NewCumulativeDistribution()
 	var scanStartTime time.Time
 	if err := tricorder.RegisterMetric("scan-duration",
 		scanTimeDistribution, units.Millisecond,
