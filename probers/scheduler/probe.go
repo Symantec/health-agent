@@ -16,7 +16,7 @@ func (p *prober) probe() error {
 	defer file.Close()
 	var str string
 	nScanned, err := fmt.Fscanf(file, "%f %f %f %s",
-		&p.loadavgOneMinute, &p.loadavgFiveMinutes, &p.loadavgFifteenMinutes,
+		&p.loadavg.oneMinute, &p.loadavg.fiveMinutes, &p.loadavg.fifteenMinutes,
 		&str)
 	if err != nil {
 		return err

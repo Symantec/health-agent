@@ -4,10 +4,14 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
+type loadAverage struct {
+	oneMinute      float32
+	fiveMinutes    float32
+	fifteenMinutes float32
+}
+
 type prober struct {
-	loadavgOneMinute      float32
-	loadavgFiveMinutes    float32
-	loadavgFifteenMinutes float32
+	loadavg loadAverage
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {

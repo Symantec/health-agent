@@ -7,15 +7,15 @@ import (
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := new(prober)
-	if err := dir.RegisterMetric("loadavg/1m", &p.loadavgOneMinute, units.None,
+	if err := dir.RegisterMetric("loadavg/1m", &p.loadavg.oneMinute, units.None,
 		"load average for the last minute"); err != nil {
 		panic(err)
 	}
-	if err := dir.RegisterMetric("loadavg/5m", &p.loadavgFiveMinutes,
+	if err := dir.RegisterMetric("loadavg/5m", &p.loadavg.fiveMinutes,
 		units.None, "load average for the last minute"); err != nil {
 		panic(err)
 	}
-	if err := dir.RegisterMetric("loadavg/15m", &p.loadavgFifteenMinutes,
+	if err := dir.RegisterMetric("loadavg/15m", &p.loadavg.fifteenMinutes,
 		units.None, "load average for the last minute"); err != nil {
 		panic(err)
 	}
