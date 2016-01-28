@@ -10,7 +10,9 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -19,10 +21,32 @@ var (
 		"Number of lines to store in the log buffer")
 	maxThreads = flag.Uint("maxThreads", 1,
 		"Maximum number of parallel OS threads to use")
+	pidfile = flag.String("pidfile", "/var/run/health-agent.pid",
+		"Name of file to write my PID to")
 	portNum = flag.Uint("portNum", 6910,
 		"Port number to allocate and listen on for HTTP/RPC")
 	probeInterval = flag.Uint("probeInterval", 10, "Probe interval in seconds")
 )
+
+func gracefulCleanup() {
+	if *pidfile != "" {
+		os.Remove(*pidfile)
+	}
+	os.Exit(1)
+}
+
+func writePidfile() {
+	if *pidfile == "" {
+		return
+	}
+	file, err := os.Create(*pidfile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+	defer file.Close()
+	fmt.Fprintln(file, os.Getpid())
+}
 
 func doMain() error {
 	flag.Parse()
@@ -52,12 +76,32 @@ func doMain() error {
 	if err := httpd.StartServer(*portNum); err != nil {
 		return err
 	}
+	sighupChannel := make(chan os.Signal)
+	signal.Notify(sighupChannel, syscall.SIGHUP)
+	sigtermChannel := make(chan os.Signal)
+	signal.Notify(sigtermChannel, syscall.SIGTERM, syscall.SIGINT)
+	startProbesChannel := make(chan bool, 1)
+	writePidfile()
+	startProbesChannel <- true
 	for {
-		scanStartTime = time.Now()
-		proberList.Probe(logger)
-		scanDuration := time.Since(scanStartTime)
-		scanTimeDistribution.Add(scanDuration)
-		time.Sleep(time.Second*time.Duration(*probeInterval) - scanDuration)
+		select {
+		case <-sighupChannel:
+			err = syscall.Exec(os.Args[0], os.Args, os.Environ())
+			if err != nil {
+				logger.Printf("Unable to Exec:%s\t%s\n", os.Args[0], err)
+			}
+		case <-sigtermChannel:
+			gracefulCleanup()
+		case <-startProbesChannel:
+			scanStartTime = time.Now()
+			proberList.Probe(logger)
+			scanDuration := time.Since(scanStartTime)
+			scanTimeDistribution.Add(scanDuration)
+			go func(sleepDuration time.Duration) {
+				time.Sleep(sleepDuration)
+				startProbesChannel <- true
+			}(time.Second*time.Duration(*probeInterval) - scanDuration)
+		}
 	}
 	return nil
 }
