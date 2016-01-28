@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/Symantec/health-agent/httpd"
 	"github.com/Symantec/health-agent/probers/filesystems"
-	"github.com/Symantec/health-agent/probers/loadavg"
 	"github.com/Symantec/health-agent/probers/memory"
 	"github.com/Symantec/health-agent/probers/netif"
 	"github.com/Symantec/health-agent/probers/network"
+	"github.com/Symantec/health-agent/probers/scheduler"
 	"github.com/Symantec/health-agent/probers/storage"
 	"github.com/Symantec/health-agent/probers/systime"
 	"github.com/Symantec/tricorder/go/tricorder"
@@ -28,7 +28,7 @@ func setupProbers() (proberList, error) {
 	}
 	var probers proberList
 	probers = append(probers, filesystems.Register(mkdir(topMetricsDir, "fs")))
-	probers = append(probers, loadavg.Register(mkdir(topMetricsDir, "loadavg")))
+	probers = append(probers, scheduler.Register(mkdir(topMetricsDir, "sched")))
 	probers = append(probers, memory.Register(mkdir(topMetricsDir, "memory")))
 	probers = append(probers, netif.Register(mkdir(topMetricsDir, "netif")))
 	probers = append(probers, network.Register(mkdir(topMetricsDir, "network")))

@@ -1,4 +1,4 @@
-package loadavg
+package scheduler
 
 import (
 	"errors"
@@ -16,7 +16,8 @@ func (p *prober) probe() error {
 	defer file.Close()
 	var str string
 	nScanned, err := fmt.Fscanf(file, "%f %f %f %s",
-		&p.oneMinute, &p.fiveMinutes, &p.fifteenMinutes, &str)
+		&p.loadavgOneMinute, &p.loadavgFiveMinutes, &p.loadavgFifteenMinutes,
+		&str)
 	if err != nil {
 		return err
 	}

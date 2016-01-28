@@ -1,13 +1,13 @@
-package loadavg
+package scheduler
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
 type prober struct {
-	oneMinute      float32
-	fiveMinutes    float32
-	fifteenMinutes float32
+	loadavgOneMinute      float32
+	loadavgFiveMinutes    float32
+	loadavgFifteenMinutes float32
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
