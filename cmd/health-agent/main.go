@@ -59,7 +59,6 @@ func doMain() error {
 		scanTimeDistribution.Add(scanDuration)
 		time.Sleep(time.Second*time.Duration(*probeInterval) - scanDuration)
 	}
-	_ = logger
 	return nil
 }
 
