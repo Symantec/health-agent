@@ -41,8 +41,7 @@ func writePidfile() {
 	}
 	file, err := os.Create(*pidfile)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		return
 	}
 	defer file.Close()
 	fmt.Fprintln(file, os.Getpid())
