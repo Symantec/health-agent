@@ -33,13 +33,13 @@ func register(dir *tricorder.DirectorySpec) *prober {
 func getNumCpus() uint64 {
 	file, err := os.Open(onlineCpuFilename)
 	if err != nil {
-		return 0
+		return 1
 	}
 	defer file.Close()
 	var low, high uint64
 	nScanned, err := fmt.Fscanf(file, "%d-%d", &low, &high)
 	if err != nil || nScanned != 2 {
-		return 0
+		return 1
 	}
 	return high - low + 1
 }
