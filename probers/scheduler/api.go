@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
+	"io"
 	"time"
 )
 
@@ -40,4 +41,8 @@ func Register(dir *tricorder.DirectorySpec) *prober {
 
 func (p *prober) Probe() error {
 	return p.probe()
+}
+
+func (p *prober) WriteHtml(writer io.Writer) {
+	p.writeHtml(writer)
 }
