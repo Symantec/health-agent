@@ -61,11 +61,11 @@ func writeHtmlBar(writer io.Writer, utilisation float64) {
 	} else if utilisation >= 0.75 {
 		barColour = "yellow"
 	}
-	fmt.Fprint(writer, `<td><table border="0" style="width:100px"><tr>`)
+	fmt.Fprint(writer, `    <td><table border="0" style="width:100px"><tr>`)
 	fmt.Fprintf(writer,
 		"<td style=\"width:%.1f%%;background-color:%s\">&nbsp;</td>",
 		utilisation*100, barColour)
 	fmt.Fprintf(writer,
 		"<td style=\"width:%.1f%%\"></td>", 100-utilisation*100)
-	fmt.Fprint(writer, "</tr></table></td>")
+	fmt.Fprintln(writer, "</tr></table></td>")
 }
