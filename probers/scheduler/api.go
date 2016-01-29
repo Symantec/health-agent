@@ -11,20 +11,27 @@ type loadAverage struct {
 	fifteenMinutes float32
 }
 
+type timeMetric struct {
+	value    time.Duration
+	fraction float64
+}
+
 type cpuStatistics struct {
-	userTime     time.Duration
-	userNiceTime time.Duration
-	systemTime   time.Duration
-	idleTime     time.Duration
-	iOWaitTime   time.Duration
-	irqTime      time.Duration
-	softIrqTime  time.Duration
+	lastProbeTime time.Time
+	idleTime      timeMetric
+	iOWaitTime    timeMetric
+	irqTime       timeMetric
+	userNiceTime  timeMetric
+	softIrqTime   timeMetric
+	systemTime    timeMetric
+	userTime      timeMetric
 }
 
 type prober struct {
-	loadavg  loadAverage
-	numCpus  uint64
-	cpuStats cpuStatistics
+	loadavg      loadAverage
+	numCpus      uint64
+	cpuStats     cpuStatistics
+	lastCpuStats cpuStatistics
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {

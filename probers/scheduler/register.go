@@ -59,34 +59,42 @@ func (p *prober) registerLoadavg(dir *tricorder.DirectorySpec) error {
 
 func (p *prober) registerCpu(dir *tricorder.DirectorySpec) error {
 	dir = mkdir(dir, "cpu")
-	if err := dir.RegisterMetric("idle-time", &p.cpuStats.idleTime, units.None,
+	if err := p.cpuStats.idleTime.register(dir, "idle-time",
 		"idle time"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("iowait-time", &p.cpuStats.iOWaitTime,
-		units.None, "time spent waiting for I/O to complete"); err != nil {
+	if err := p.cpuStats.iOWaitTime.register(dir, "iowait-time",
+		"time spent waiting for I/O to complete"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("irq-time", &p.cpuStats.irqTime,
-		units.None, "time spent servicing interrupts"); err != nil {
+	if err := p.cpuStats.irqTime.register(dir, "irq-time",
+		"time spent servicing interrupts"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("nice-time", &p.cpuStats.userNiceTime,
-		units.None,
+	if err := p.cpuStats.userNiceTime.register(dir, "nice-time",
 		"niced processes executing in user mode"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("softirq-time", &p.cpuStats.softIrqTime,
-		units.None, "time spent servicing softirqs"); err != nil {
+	if err := p.cpuStats.softIrqTime.register(dir, "softirq-time",
+		"time spent servicing softirqs"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("system-time", &p.cpuStats.systemTime,
-		units.None, "processes executing in kernel mode"); err != nil {
+	if err := p.cpuStats.systemTime.register(dir, "system-time",
+		"processes executing in kernel mode"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("user-time", &p.cpuStats.userTime, units.None,
+	if err := p.cpuStats.userTime.register(dir, "user-time",
 		"normal priority processes executing in user mode"); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (m *timeMetric) register(dir *tricorder.DirectorySpec,
+	name, use string) error {
+	if err := dir.RegisterMetric(name, &m.value, units.None, use); err != nil {
+		return err
+	}
+	return dir.RegisterMetric(name+"-fraction", &m.fraction, units.None,
+		use+" during last probe interval")
 }
