@@ -9,46 +9,100 @@
 # Short-Description:	System health agent
 ### END INIT INFO
 
-set -e
-
 # /etc/init.d/health-agent: start and stop the system health daemon
-
-test -x /usr/local/bin/health-agent || exit 0
-
-umask 022
 
 . /lib/lsb/init-functions
 
+umask 022
+
+readonly default_log_dir='/var/log/health-agent'
+readonly LOOP_PIDFILE='/var/run/health-agent.loop.pid'
+readonly PIDFILE='/var/run/health-agent.pid'
+
+DAEMON='/usr/local/sbin/health-agent'
+LOG_DIR="$default_log_dir"
+LOG_QUOTA=
+LOGBUF_LINES=
+PROBE_INTERVAL=
+USERNAME=
+
+PROG_ARGS=
+
+[ -f /etc/default/health-agent ] && . /etc/default/health-agent
+
+test -x "$DAEMON" || exit 0
+
 export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/local/sbin:/usr/sbin:/sbin"
-readonly pidfile="/var/run/health-agent.pid"
+
+mkdir -m 0750 -p "$LOG_DIR"
+chown "$USERNAME" "$LOG_DIR"
+
+if [ -n "$LOG_DIR" ] && [ "$LOG_DIR" != "$default_log_dir" ]; then
+    PROG_ARGS="$PROG_ARGS -logDir=$LOG_DIR"
+fi
+
+if [ -n "$LOG_QUOTA" ]; then
+    PROG_ARGS="$PROG_ARGS -logQuota=$LOG_QUOTA"
+fi
+
+if [ -n "$LOGBUF_LINES" ]; then
+    PROG_ARGS="$PROG_ARGS -logbufLines=$LOGBUF_LINES"
+fi
+
+if [ -n "$PROBE_INTERVAL" ]; then
+    PROG_ARGS="$PROG_ARGS -probeInterval=$PROBE_INTERVAL"
+fi
+
+do_start ()
+{
+    if [ -z "$USERNAME" ]; then
+	"$DAEMON" $PROG_ARGS
+	return
+    fi
+    start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
+		      --exec "$DAEMON" --chuid "$USERNAME" --make-pidfile -- \
+		      $PROG_ARGS
+}
+
+start_loop ()
+{
+    echo "$BASHPID" > "$LOOP_PIDFILE"
+    while true; do
+	do_start
+	rm -f "$PIDFILE"
+	sleep 1
+    done
+}
 
 case "$1" in
   start)
 	log_daemon_msg "Starting system health agent" "health-agent" || true
-	/usr/local/bin/health-agent < /dev/null &> /dev/null &
+	(start_loop < /dev/null &> /dev/null &)
 	;;
   stop)
 	log_daemon_msg "Stopping system health agent" "health-agent" || true
-	if [ -s "$pidfile" ]; then
-	    kill -TERM $(cat "$pidfile")
+	if [ -s "$PIDFILE" ]; then
+	    [ -s "$LOOP_PIDFILE" ] && kill -KILL $(cat "$LOOP_PIDFILE")
+	    [ -s "$PIDFILE" ]      && kill -TERM $(cat "$PIDFILE")
+	    rm -f "$LOOP_PIDFILE" "$PIDFILE"
 	else
 	    killall -o 1s health-agent
 	fi
 	;;
 
   reload|force-reload)
-	kill -HUP $(cat "$pidfile")
+	kill -HUP $(cat "$PIDFILE")
 	;;
 
   restart)
-	kill -HUP $(cat "$pidfile")
+	kill -HUP $(cat "$PIDFILE")
 	;;
 
   start-if-down)
-	[ -s "$pidfile" ] && kill -0 $(cat "$pidfile") &> /dev/null && exit
+	[ -s "$LOOP_PIDFILE" ] && kill -0 $(cat "$LOOP_PIDFILE") &> /dev/null && exit
 	killall -o 1s health-agent || true
 	log_daemon_msg "Starting system health agent" "health-agent" || true
-	/usr/local/bin/health-agent < /dev/null &> /dev/null &
+	(start_loop < /dev/null &> /dev/null &)
 	;;
 
   *)
