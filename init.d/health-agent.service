@@ -3,7 +3,7 @@ Description=System health agent
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/health-agent
+ExecStart=/usr/local/sbin/health-agent
 Restart=always
 RestartSec=1
 
