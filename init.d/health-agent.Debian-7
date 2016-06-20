@@ -1,4 +1,9 @@
 #! /bin/bash --posix
+#
+# health-agent		Start up the health-agent daemon
+#
+# chkconfig: 2345 95 25
+# description: health-agent publishes system health metrics.
 
 ### BEGIN INIT INFO
 # Provides:		health-agent
@@ -10,6 +15,12 @@
 ### END INIT INFO
 
 # /etc/init.d/health-agent: start and stop the system health daemon
+
+# CentOS-6 doesn't provide this, so provide a default.
+log_daemon_msg ()
+{
+    echo "$@"
+}
 
 . /lib/lsb/init-functions
 
@@ -35,7 +46,6 @@ test -x "$DAEMON" || exit 0
 export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/local/sbin:/usr/sbin:/sbin"
 
 mkdir -m 0750 -p "$LOG_DIR"
-chown "$USERNAME" "$LOG_DIR"
 
 if [ -n "$LOG_DIR" ] && [ "$LOG_DIR" != "$default_log_dir" ]; then
     PROG_ARGS="$PROG_ARGS -logDir=$LOG_DIR"
@@ -59,6 +69,7 @@ do_start ()
 	"$DAEMON" $PROG_ARGS
 	return
     fi
+    chown "$USERNAME" "$LOG_DIR"
     start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
 		      --exec "$DAEMON" --chuid "$USERNAME" --make-pidfile -- \
 		      $PROG_ARGS
