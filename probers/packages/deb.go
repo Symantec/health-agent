@@ -81,6 +81,11 @@ func (p *prober) probeDebs() error {
 	if err := scanner.Err(); err != nil {
 		return err
 	}
+	if pEntry != nil {
+		if err := p.addPackage(p.debian, pEntry); err != nil {
+			return err
+		}
+	}
 	for packageName := range packagesToDelete {
 		p.debian.packages[packageName].dir.UnregisterDirectory()
 		delete(p.debian.packages, packageName)
