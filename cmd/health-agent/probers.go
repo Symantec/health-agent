@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Symantec/health-agent/httpd"
 	"github.com/Symantec/health-agent/probers/filesystems"
+	"github.com/Symantec/health-agent/probers/kernel"
 	"github.com/Symantec/health-agent/probers/memory"
 	"github.com/Symantec/health-agent/probers/netif"
 	"github.com/Symantec/health-agent/probers/network"
@@ -34,6 +35,7 @@ func setupProbers() (proberList, error) {
 	probers = append(probers, network.Register(mkdir(topMetricsDir, "network")))
 	probers = append(probers, storage.Register(mkdir(topMetricsDir, "storage")))
 	probers = append(probers, systime.Register(mkdir(topMetricsDir, "")))
+	probers = append(probers, kernel.Register(mkdir(topMetricsDir, "kernel")))
 	return probers, nil
 }
 
