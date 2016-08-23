@@ -2,6 +2,7 @@ package packages
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
+	"time"
 )
 
 type packageEntry struct {
@@ -12,13 +13,15 @@ type packageEntry struct {
 }
 
 type packageList struct {
-	dir      *tricorder.DirectorySpec
-	packages map[string]*packageEntry
+	dir                      *tricorder.DirectorySpec
+	packages                 map[string]*packageEntry
+	packagesAddedDuringProbe map[string]struct{}
 }
 
 type prober struct {
-	dir    *tricorder.DirectorySpec
-	debian *packageList
+	dir                *tricorder.DirectorySpec
+	lastProbeStartTime time.Time
+	packagers          map[string]*packageList
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {

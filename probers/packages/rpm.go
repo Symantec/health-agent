@@ -1,9 +1,9 @@
 package packages
 
-var (
-	rpmDirectory = "/var/lib/rpm"
+import (
+	"io"
 )
 
-func (p *prober) probeRpms() error {
+func probeRpms(pList *packageList, reader io.Reader) error {
 	return nil
 }

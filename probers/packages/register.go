@@ -6,7 +6,8 @@ import (
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := &prober{
-		dir: dir,
+		dir:       dir,
+		packagers: make(map[string]*packageList),
 	}
 	return p
 }

@@ -2,42 +2,13 @@ package packages
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"strconv"
 	"strings"
 )
 
-var (
-	debStatusFile = "/var/lib/dpkg/status"
-)
-
-func (p *prober) probeDebs() error {
-	file, err := os.Open(debStatusFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if p.debian != nil {
-				p.debian.dir.UnregisterDirectory()
-				p.debian = nil
-			}
-		}
-		return err
-	}
-	defer file.Close()
-	if p.debian == nil {
-		dir, err := p.dir.RegisterDirectory("debs")
-		if err != nil {
-			return err
-		}
-		p.debian = &packageList{
-			dir:      dir,
-			packages: make(map[string]*packageEntry),
-		}
-	}
-	packagesToDelete := make(map[string]struct{})
-	for packageName := range p.debian.packages {
-		packagesToDelete[packageName] = struct{}{}
-	}
-	scanner := bufio.NewScanner(file)
+func probeDebs(pList *packageList, reader io.Reader) error {
+	scanner := bufio.NewScanner(reader)
 	var pEntry *packageEntry
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -51,12 +22,11 @@ func (p *prober) probeDebs() error {
 		fields := strings.Fields(line)
 		if fields[0] == "Package:" {
 			if pEntry != nil {
-				if err := p.addPackage(p.debian, pEntry); err != nil {
+				if err := addPackage(pList, pEntry); err != nil {
 					return err
 				}
 			}
 			pEntry = &packageEntry{name: fields[1]}
-			delete(packagesToDelete, pEntry.name)
 			continue
 		}
 		if pEntry == nil {
@@ -82,13 +52,9 @@ func (p *prober) probeDebs() error {
 		return err
 	}
 	if pEntry != nil {
-		if err := p.addPackage(p.debian, pEntry); err != nil {
+		if err := addPackage(pList, pEntry); err != nil {
 			return err
 		}
-	}
-	for packageName := range packagesToDelete {
-		p.debian.packages[packageName].dir.UnregisterDirectory()
-		delete(p.debian.packages, packageName)
 	}
 	return nil
 }
