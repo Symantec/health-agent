@@ -8,6 +8,7 @@ import (
 	"github.com/Symantec/health-agent/probers/memory"
 	"github.com/Symantec/health-agent/probers/netif"
 	"github.com/Symantec/health-agent/probers/network"
+	"github.com/Symantec/health-agent/probers/packages"
 	"github.com/Symantec/health-agent/probers/scheduler"
 	"github.com/Symantec/health-agent/probers/storage"
 	"github.com/Symantec/health-agent/probers/systime"
@@ -36,6 +37,8 @@ func setupProbers() (proberList, error) {
 	probers = append(probers, storage.Register(mkdir(topMetricsDir, "storage")))
 	probers = append(probers, systime.Register(mkdir(topMetricsDir, "")))
 	probers = append(probers, kernel.Register(mkdir(topMetricsDir, "kernel")))
+	probers = append(probers, packages.Register(mkdir(topMetricsDir,
+		"packages")))
 	return probers, nil
 }
 
