@@ -5,6 +5,7 @@ import (
 )
 
 type prober struct {
+	randomEntropyAvailable uint64
 }
 
 func Register(dir *tricorder.DirectorySpec) *prober {
