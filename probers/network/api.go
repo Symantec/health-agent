@@ -1,6 +1,7 @@
 package network
 
 import (
+	libprober "github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
@@ -11,7 +12,7 @@ type prober struct {
 	gatewayRttDistribution      *tricorder.CumulativeDistribution
 }
 
-func Register(dir *tricorder.DirectorySpec) *prober {
+func Register(dir *tricorder.DirectorySpec) libprober.Prober {
 	return register(dir)
 }
 

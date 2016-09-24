@@ -1,6 +1,7 @@
 package storage
 
 import (
+	libprober "github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
@@ -15,7 +16,7 @@ type storageDevice struct {
 	probed bool
 }
 
-func Register(dir *tricorder.DirectorySpec) *prober {
+func Register(dir *tricorder.DirectorySpec) libprober.Prober {
 	return register(dir)
 }
 

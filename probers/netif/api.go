@@ -1,6 +1,7 @@
 package netif
 
 import (
+	libprober "github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"io"
 	"time"
@@ -40,7 +41,7 @@ type netInterface struct {
 	txDataRate          uint64
 }
 
-func Register(dir *tricorder.DirectorySpec) *prober {
+func Register(dir *tricorder.DirectorySpec) libprober.Prober {
 	return register(dir)
 }
 
