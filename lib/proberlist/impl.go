@@ -13,10 +13,6 @@ var (
 	latencyBucketer = tricorder.NewGeometricBucketer(0.1, 100e3)
 )
 
-type htmlWriter interface {
-	WriteHtml(writer io.Writer)
-}
-
 func newProberList(proberPath string) *ProberList {
 	pl := &ProberList{
 		proberPath:            proberPath,
@@ -72,7 +68,7 @@ func (pl *ProberList) probe(logger *log.Logger) {
 
 func (pl *ProberList) writeHtml(writer io.Writer) {
 	for _, p := range pl.probers {
-		if htmler, ok := p.prober.(htmlWriter); ok {
+		if htmler, ok := p.prober.(HtmlWriter); ok {
 			htmler.WriteHtml(writer)
 			fmt.Fprintln(writer, "<br>")
 		}
