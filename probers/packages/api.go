@@ -1,6 +1,7 @@
 package packages
 
 import (
+	libprober "github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"time"
 )
@@ -24,7 +25,7 @@ type prober struct {
 	packagers          map[string]*packageList
 }
 
-func Register(dir *tricorder.DirectorySpec) *prober {
+func Register(dir *tricorder.DirectorySpec) libprober.Prober {
 	return register(dir)
 }
 
