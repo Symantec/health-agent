@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"github.com/Symantec/Dominator/lib/logbuf"
 	"github.com/Symantec/health-agent/httpd"
-	"github.com/Symantec/tricorder/go/tricorder"
-	"github.com/Symantec/tricorder/go/tricorder/units"
 	"log"
 	"net/rpc"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 )
 
 var (
@@ -57,31 +54,18 @@ func doMain() error {
 	if err != nil {
 		return err
 	}
-	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 100e3)
-	scanTimeDistribution := latencyBucketer.NewCumulativeDistribution()
-	var scanStartTime time.Time
-	if err := tricorder.RegisterMetric("scan-duration",
-		scanTimeDistribution, units.Millisecond,
-		"duration of last probe"); err != nil {
-		return err
-	}
-	if err := tricorder.RegisterMetric("scan-start-time", &scanStartTime,
-		units.None, "start time of last probe"); err != nil {
-		return err
-	}
-	rpc.HandleHTTP()
 	httpd.AddHtmlWriter(proberList)
 	httpd.AddHtmlWriter(circularBuffer)
-	if err := httpd.StartServer(*portNum); err != nil {
-		return err
-	}
 	sighupChannel := make(chan os.Signal)
 	signal.Notify(sighupChannel, syscall.SIGHUP)
 	sigtermChannel := make(chan os.Signal)
 	signal.Notify(sigtermChannel, syscall.SIGTERM, syscall.SIGINT)
-	startProbesChannel := make(chan bool, 1)
+	rpc.HandleHTTP()
+	if err := httpd.StartServer(*portNum); err != nil {
+		return err
+	}
 	writePidfile()
-	startProbesChannel <- true
+	proberList.StartProbing(*probeInterval, logger)
 	for {
 		select {
 		case <-sighupChannel:
@@ -91,15 +75,6 @@ func doMain() error {
 			}
 		case <-sigtermChannel:
 			gracefulCleanup()
-		case <-startProbesChannel:
-			scanStartTime = time.Now()
-			proberList.Probe(logger)
-			scanDuration := time.Since(scanStartTime)
-			scanTimeDistribution.Add(scanDuration)
-			go func(sleepDuration time.Duration) {
-				time.Sleep(sleepDuration)
-				startProbesChannel <- true
-			}(time.Second*time.Duration(*probeInterval) - scanDuration)
 		}
 	}
 	return nil

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"github.com/Symantec/health-agent/httpd"
+	"github.com/Symantec/health-agent/lib/proberlist"
 	"github.com/Symantec/health-agent/probers/filesystems"
 	"github.com/Symantec/health-agent/probers/kernel"
 	"github.com/Symantec/health-agent/probers/memory"
@@ -12,60 +11,18 @@ import (
 	"github.com/Symantec/health-agent/probers/scheduler"
 	"github.com/Symantec/health-agent/probers/storage"
 	"github.com/Symantec/health-agent/probers/systime"
-	"github.com/Symantec/tricorder/go/tricorder"
-	"io"
-	"log"
 )
 
-type prober interface {
-	Probe() error
-}
-
-type proberList []prober
-
-func setupProbers() (proberList, error) {
-	topMetricsDir, err := tricorder.RegisterDirectory("/sys")
-	if err != nil {
-		return nil, err
-	}
-	var probers proberList
-	probers = append(probers, filesystems.Register(mkdir(topMetricsDir, "fs")))
-	probers = append(probers, scheduler.Register(mkdir(topMetricsDir, "sched")))
-	probers = append(probers, memory.Register(mkdir(topMetricsDir, "memory")))
-	probers = append(probers, netif.Register(mkdir(topMetricsDir, "netif")))
-	probers = append(probers, network.Register(mkdir(topMetricsDir, "network")))
-	probers = append(probers, storage.Register(mkdir(topMetricsDir, "storage")))
-	probers = append(probers, systime.Register(mkdir(topMetricsDir, "")))
-	probers = append(probers, kernel.Register(mkdir(topMetricsDir, "kernel")))
-	probers = append(probers, packages.Register(mkdir(topMetricsDir,
-		"packages")))
-	return probers, nil
-}
-
-func mkdir(dir *tricorder.DirectorySpec, name string) *tricorder.DirectorySpec {
-	if name == "" {
-		return dir
-	}
-	subdir, err := dir.RegisterDirectory(name)
-	if err != nil {
-		panic(err)
-	}
-	return subdir
-}
-
-func (probers proberList) Probe(logger *log.Logger) {
-	for _, p := range probers {
-		if err := p.Probe(); err != nil {
-			logger.Println(err)
-		}
-	}
-}
-
-func (probers proberList) WriteHtml(writer io.Writer) {
-	for _, p := range probers {
-		if htmler, ok := p.(httpd.HtmlWriter); ok {
-			htmler.WriteHtml(writer)
-			fmt.Fprintln(writer, "<br>")
-		}
-	}
+func setupProbers() (*proberlist.ProberList, error) {
+	pl := proberlist.New("/probers")
+	pl.Add(filesystems.Register, "/sys/fs", 0)
+	pl.Add(scheduler.Register, "/sys/sched", 0)
+	pl.Add(memory.Register, "/sys/memory", 0)
+	pl.Add(netif.Register, "/sys/netif", 0)
+	pl.Add(network.Register, "/sys/network", 0)
+	pl.Add(storage.Register, "/sys/storage", 0)
+	pl.Add(systime.Register, "/sys/systime", 0)
+	pl.Add(kernel.Register, "/sys/kernel", 0)
+	pl.Add(packages.Register, "/sys/packages", 0)
+	return pl, nil
 }
