@@ -2,6 +2,7 @@ package proberlist
 
 import (
 	"fmt"
+	"github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
 	"io"
@@ -31,18 +32,26 @@ func newProberList(proberPath string) *ProberList {
 	return pl
 }
 
-func (pl *ProberList) add(registerFunc RegisterFunc, path string,
+func (pl *ProberList) add(registerProber RegisterProber, path string,
 	probeInterval uint8) {
-	prober := proberType{
-		prober:                registerFunc(mkdir(path)),
+	if err := registerProber.Register(mkdir(path)); err != nil {
+		panic(err)
+	}
+	pl.addProber(registerProber, path, probeInterval)
+}
+
+func (pl *ProberList) addProber(genericProber prober.Prober, path string,
+	probeInterval uint8) {
+	newProber := proberType{
+		prober:                genericProber,
 		probeTimeDistribution: latencyBucketer.NewCumulativeDistribution(),
 	}
 	if err := tricorder.RegisterMetric(pl.proberPath+path+"/probe-duration",
-		prober.probeTimeDistribution, units.Millisecond,
+		newProber.probeTimeDistribution, units.Millisecond,
 		"duration of last probe"); err != nil {
 		panic(err)
 	}
-	pl.probers = append(pl.probers, prober)
+	pl.probers = append(pl.probers, newProber)
 }
 
 func (pl *ProberList) proberLoop(probeInterval uint, logger *log.Logger) {

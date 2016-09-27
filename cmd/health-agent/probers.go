@@ -15,14 +15,14 @@ import (
 
 func setupProbers() (*proberlist.ProberList, error) {
 	pl := proberlist.New("/probers")
-	pl.Add(filesystems.Register, "/sys/fs", 0)
-	pl.Add(scheduler.Register, "/sys/sched", 0)
-	pl.Add(memory.Register, "/sys/memory", 0)
-	pl.Add(netif.Register, "/sys/netif", 0)
-	pl.Add(network.Register, "/sys/network", 0)
-	pl.Add(storage.Register, "/sys/storage", 0)
-	pl.Add(systime.Register, "/sys/systime", 0)
-	pl.Add(kernel.Register, "/sys/kernel", 0)
-	pl.Add(packages.Register, "/sys/packages", 0)
+	pl.CreateAndAdd(filesystems.Register, "/sys/fs", 0)
+	pl.CreateAndAdd(scheduler.Register, "/sys/sched", 0)
+	pl.CreateAndAdd(memory.Register, "/sys/memory", 0)
+	pl.CreateAndAdd(netif.Register, "/sys/netif", 0)
+	pl.CreateAndAdd(network.Register, "/sys/network", 0)
+	pl.CreateAndAdd(storage.Register, "/sys/storage", 0)
+	pl.CreateAndAdd(systime.Register, "/sys/systime", 0)
+	pl.CreateAndAdd(kernel.Register, "/sys/kernel", 0)
+	pl.CreateAndAdd(packages.Register, "/sys/packages", 0)
 	return pl, nil
 }
