@@ -31,7 +31,7 @@ func newProberList(proberPath string) *ProberList {
 	return pl
 }
 
-func (pl *ProberList) add(registerFunc RegisterFunc, path string,
+func (pl *ProberList) createAndAdd(registerFunc RegisterFunc, path string,
 	probeInterval uint8) {
 	prober := proberType{
 		prober:                registerFunc(mkdir(path)),

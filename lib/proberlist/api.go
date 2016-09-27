@@ -35,12 +35,12 @@ func New(proberPath string) *ProberList {
 	return newProberList(proberPath)
 }
 
-// Add registers a new Prober which is created by the registerFunc. The path for
-// the metrics for the Prober is given by path. The preferred probe interval in
-// seconds is given by probeInterval.
-func (pl *ProberList) Add(registerFunc RegisterFunc, path string,
+// CreateAndAdd registers a new Prober which is created by the registerFunc. The
+// path for the metrics for the Prober is given by path. The preferred probe
+// interval in seconds is given by probeInterval.
+func (pl *ProberList) CreateAndAdd(registerFunc RegisterFunc, path string,
 	probeInterval uint8) {
-	pl.add(registerFunc, path, probeInterval)
+	pl.createAndAdd(registerFunc, path, probeInterval)
 }
 
 // StartProbing creates one or more goroutines which will run probes in an
