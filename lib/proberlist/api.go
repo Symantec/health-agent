@@ -23,6 +23,7 @@ type RegisterProber interface {
 
 type proberType struct {
 	prober                prober.Prober
+	probeInterval         time.Duration
 	probeTimeDistribution *tricorder.CumulativeDistribution
 }
 
@@ -62,7 +63,7 @@ func (pl *ProberList) CreateAndAdd(registerFunc RegisterFunc, path string,
 // defaultProbeInterval. The logger will be used to log problems.
 func (pl *ProberList) StartProbing(defaultProbeInterval uint,
 	logger *log.Logger) {
-	go pl.proberLoop(defaultProbeInterval, logger)
+	pl.startProbing(defaultProbeInterval, logger)
 }
 
 // WriteHtml will write HTML snippets to writer. Each Prober that implements the
