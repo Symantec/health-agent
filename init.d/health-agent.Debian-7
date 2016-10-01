@@ -92,10 +92,13 @@ case "$1" in
 	;;
   stop)
 	log_daemon_msg "Stopping system health agent" "health-agent" || true
+	if [ -s "$LOOP_PIDFILE" ]; then
+	     kill -KILL $(cat "$LOOP_PIDFILE")
+	     rm -f "$LOOP_PIDFILE"
+	fi
 	if [ -s "$PIDFILE" ]; then
-	    [ -s "$LOOP_PIDFILE" ] && kill -KILL $(cat "$LOOP_PIDFILE")
-	    [ -s "$PIDFILE" ]      && kill -TERM $(cat "$PIDFILE")
-	    rm -f "$LOOP_PIDFILE" "$PIDFILE"
+	    kill -TERM $(cat "$PIDFILE")
+	    rm -f "$PIDFILE"
 	else
 	    killall -o 1s health-agent
 	fi

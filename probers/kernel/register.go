@@ -16,6 +16,11 @@ func register(dir *tricorder.DirectorySpec) *prober {
 		"raw kernel version"); err != nil {
 		panic(err)
 	}
+	if err := dir.RegisterMetric("random/entropy-available",
+		&p.randomEntropyAvailable, units.Byte,
+		"entropy available for the random number generator"); err != nil {
+		panic(err)
+	}
 	return p
 }
 
