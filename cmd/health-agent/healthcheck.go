@@ -2,7 +2,7 @@ package main
 
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
-	process "github.com/Symantec/health-agent/probers/process"
+	pidprober "github.com/Symantec/health-agent/probers/pidfile"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -62,7 +62,7 @@ func makeProber(testname string, c *testConfig, logger *log.Logger) (libprober.R
 		if pidpath == "" {
 			return nil 
 		}
-		return process.Makepidprober(testname, pidpath)
+		return pidprober.Makepidprober(testname, pidpath)
 	default:
 		logger.Println("Test type %s not supported", c.Testtype)
 		return nil

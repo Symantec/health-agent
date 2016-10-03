@@ -1,4 +1,4 @@
-package process
+package pidfile
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"

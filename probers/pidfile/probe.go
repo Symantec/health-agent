@@ -1,4 +1,4 @@
-package process
+package pidfile
 
 import (
 	"io/ioutil"
