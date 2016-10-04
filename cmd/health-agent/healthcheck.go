@@ -42,9 +42,10 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 		if configfile.IsDir() {
 			continue
 		}
-		data, err := ioutil.ReadFile(path.Join(configDir, configfile.Name()))
+		data, err := ioutil.ReadFile(path.Join(configdir.Name(),
+			configfile.Name()))
 		if err != nil {
-			logger.Printf("Unable to read file %s\n%q", configfile.Name(), err)
+			logger.Printf("Unable to read file %q: %s", configfile.Name(), err)
 			return err
 		}
 		c := testConfig{}
