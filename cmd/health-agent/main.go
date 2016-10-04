@@ -14,6 +14,8 @@ import (
 )
 
 var (
+	configDir = flag.String("configDir", "/etc/health-agent",
+		"Name of the directory containing the health check configs")
 	logbufLines = flag.Uint("logbufLines", 1024,
 		"Number of lines to store in the log buffer")
 	maxThreads = flag.Uint("maxThreads", 1,
@@ -52,6 +54,10 @@ func doMain() error {
 	logger := log.New(circularBuffer, "", log.LstdFlags)
 	proberList, err := setupProbers()
 	if err != nil {
+		return err
+	}
+	if err := setupHealthchecks(*configDir, proberList, logger); err != nil {
+		logger.Printf("Error occured while setting up Healthchecks")
 		return err
 	}
 	httpd.AddHtmlWriter(proberList)
