@@ -10,11 +10,11 @@ func (p *pidconfig) register(dir *tricorder.DirectorySpec) error {
 		"Is process healthy?"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("pidfile-exists", &p.pidfileexists, units.None,
+	if err := dir.RegisterMetric("pidfile-exists", &p.pidFileExists, units.None,
 		"Does pidfile exist?"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("pid-exists", &p.pidexists, units.None,
+	if err := dir.RegisterMetric("pid-exists", &p.pidExists, units.None,
 		"Does pid exist?"); err != nil {
 		return err
 	}

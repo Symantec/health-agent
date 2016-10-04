@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -23,8 +24,9 @@ type testSpecs struct {
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList, logger *log.Logger) error {
-	topDir := "/health-checks/"
-	configdir, err := os.Open(configDir)
+	topDir := "/health-checks"
+	configdir, err := os.Open(path.Join(configDir, "tests.d"))
+	defer configdir.Close()
 	if err != nil {
 		return err
 	}
@@ -36,20 +38,19 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList, logger *log.L
 		if configfile.IsDir() {
 			continue
 		}
-		data, err := ioutil.ReadFile(configDir + configfile.Name())
+		data, err := ioutil.ReadFile(path.Join(configDir,configfile.Name()))
 		if err != nil {
 			logger.Printf("Unable to read file %s\n%q", configfile.Name(), err)
-			continue
+			return err
 		}
 		c := testConfig{}
 		if err := yaml.Unmarshal([]byte(data), &c); err != nil {
 			logger.Printf("Error unmarshalling file %s: %q", configfile.Name(), err)
-			continue
+			return err
 		}
 		testname := strings.Split(configfile.Name(), ".")[0]
-		prober := makeProber(testname, &c, logger)
-		if prober != nil {
-			pl.Add(prober, topDir + testname, c.Probefreq)
+		if prober := makeProber(testname, &c, logger); prober != nil {
+			pl.Add(prober, path.Join(topDir, testname), c.Probefreq)
 		}
 	}
 	return nil

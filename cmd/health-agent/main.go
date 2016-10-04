@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	configDir = flag.String("configDir", "/etc/health-agent/tests.d/",
+	configDir = flag.String("configDir", "/etc/health-agent",
 		"Name of the directory containing the health check configs")
 	logbufLines = flag.Uint("logbufLines", 1024,
 		"Number of lines to store in the log buffer")

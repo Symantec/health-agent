@@ -9,7 +9,6 @@ import (
 )
 
 func (p *pidconfig) probe() error {
-	p.setpidfile(true)
 	if _, err := os.Stat(p.pidfilepath); os.IsNotExist(err) {
 		p.setpidfile(false)
 		return err
@@ -25,24 +24,25 @@ func (p *pidconfig) probe() error {
 		p.setpid(false)
 		return err
 	}
-	p.process.Pid = int(pid)
-	if err := p.process.Signal(syscall.Signal(0)); err != nil {
+	process := os.Process{Pid: int(pid)}
+	if err := process.Signal(syscall.Signal(0)); err != nil {
 		p.setpid(false)
 		return err
 	}
+	p.setpidfile(true)
 	return nil
 }
 
 func (p *pidconfig) sethealthy() {
-	p.healthy = p.pidexists && p.pidexists
+	p.healthy = p.pidFileExists && p.pidExists
 }
 
 func (p *pidconfig) setpidfile(v bool) {
-	p.pidfileexists = v
+	p.pidFileExists = v
 	p.setpid(v)
 }
 
 func (p *pidconfig) setpid(v bool) {
-	p.pidexists = v
+	p.pidExists = v
 	p.sethealthy()
 }

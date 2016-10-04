@@ -2,16 +2,14 @@ package pidfile
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
-	"os"
 )
 
 type pidconfig struct {
 	processname   string
 	pidfilepath   string
-	process       os.Process
 	healthy       bool
-	pidfileexists bool
-	pidexists     bool
+	pidFileExists bool
+	pidExists     bool
 }
 
 func (p *pidconfig) Register(dir *tricorder.DirectorySpec) error {
