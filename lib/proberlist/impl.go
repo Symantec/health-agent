@@ -59,7 +59,7 @@ func (pl *ProberList) startProbing(defaultProbeInterval uint,
 	logger *log.Logger) {
 	for _, p := range pl.probers {
 		if p.probeInterval > 0 {
-			go p.proberLoop(logger)
+			go p.proberLoop(defaultProbeInterval, logger)
 		}
 	}
 	go pl.proberLoop(defaultProbeInterval, logger)
@@ -98,7 +98,15 @@ func (pl *ProberList) writeHtml(writer io.Writer) {
 	}
 }
 
-func (p proberType) proberLoop(logger *log.Logger) {
+func (p proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
+	// Set the initial probe interval to the global default, if less than the
+	// interval for this prober. The probe interval will be gradually increased
+	// until the target probe interval is reached. This gives faster probing at
+	// startup when higher resolution may be helpful, and then backs off.
+	probeInterval := time.Duration(defaultProbeInterval) * time.Second
+	if probeInterval > p.probeInterval {
+		probeInterval = p.probeInterval
+	}
 	for {
 		probeStartTime := time.Now()
 		if err := p.prober.Probe(); err != nil {
@@ -106,7 +114,15 @@ func (p proberType) proberLoop(logger *log.Logger) {
 		}
 		probeDuration := time.Since(probeStartTime)
 		p.probeTimeDistribution.Add(probeDuration)
-		time.Sleep(p.probeInterval - probeDuration)
+		time.Sleep(probeInterval - probeDuration)
+		// Increase the probe interval until the interval for this prober is
+		// reached.
+		if probeInterval < p.probeInterval {
+			probeInterval += time.Duration(defaultProbeInterval) * time.Second
+		}
+		if probeInterval > p.probeInterval {
+			probeInterval = p.probeInterval
+		}
 	}
 }
 
