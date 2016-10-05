@@ -16,8 +16,6 @@ import (
 var (
 	configDir = flag.String("configDir", "/etc/health-agent",
 		"Name of the directory containing the health check configs")
-	logbufLines = flag.Uint("logbufLines", 1024,
-		"Number of lines to store in the log buffer")
 	maxThreads = flag.Uint("maxThreads", 1,
 		"Maximum number of parallel OS threads to use")
 	pidfile = flag.String("pidfile", "/var/run/health-agent.pid",
@@ -50,7 +48,7 @@ func doMain() error {
 	flag.Parse()
 	runtime.GOMAXPROCS(int(*maxThreads))
 	runtime.LockOSThread()
-	circularBuffer := logbuf.New(*logbufLines)
+	circularBuffer := logbuf.New()
 	logger := log.New(circularBuffer, "", log.LstdFlags)
 	proberList, err := setupProbers()
 	if err != nil {
