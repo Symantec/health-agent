@@ -42,7 +42,7 @@ func (pl *ProberList) add(registerProber RegisterProber, path string,
 
 func (pl *ProberList) addProber(genericProber prober.Prober, path string,
 	probeInterval uint8) {
-	newProber := proberType{
+	newProber := &proberType{
 		prober:                genericProber,
 		probeInterval:         time.Duration(probeInterval) * time.Second,
 		probeTimeDistribution: latencyBucketer.NewCumulativeDistribution(),
@@ -51,6 +51,19 @@ func (pl *ProberList) addProber(genericProber prober.Prober, path string,
 		newProber.probeTimeDistribution, units.Millisecond,
 		"duration of last probe"); err != nil {
 		panic(err)
+	}
+	if probeInterval > 0 {
+		if err := tricorder.RegisterMetric(pl.proberPath+path+"/probe-interval",
+			&newProber.probeInterval, units.Second,
+			"probe interval"); err != nil {
+			panic(err)
+		}
+		if err := tricorder.RegisterMetric(
+			pl.proberPath+path+"/probe-start-time",
+			&newProber.probeStartTime, units.None,
+			"start time of last probe"); err != nil {
+			panic(err)
+		}
 	}
 	pl.probers = append(pl.probers, newProber)
 }
@@ -98,7 +111,7 @@ func (pl *ProberList) writeHtml(writer io.Writer) {
 	}
 }
 
-func (p proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
+func (p *proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
 	// Set the initial probe interval to the global default, if less than the
 	// interval for this prober. The probe interval will be gradually increased
 	// until the target probe interval is reached. This gives faster probing at
@@ -108,11 +121,11 @@ func (p proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
 		probeInterval = p.probeInterval
 	}
 	for {
-		probeStartTime := time.Now()
+		p.probeStartTime = time.Now()
 		if err := p.prober.Probe(); err != nil {
 			logger.Println(err)
 		}
-		probeDuration := time.Since(probeStartTime)
+		probeDuration := time.Since(p.probeStartTime)
 		p.probeTimeDistribution.Add(probeDuration)
 		time.Sleep(probeInterval - probeDuration)
 		// Increase the probe interval until the interval for this prober is
