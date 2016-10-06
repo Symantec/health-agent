@@ -3,6 +3,7 @@ package main
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
+	scriptprober "github.com/Symantec/health-agent/probers/script"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -18,9 +19,10 @@ type testConfig struct {
 }
 
 type testSpecs struct {
-	Pidfilepath string
-	Urlpath     string
-	Urlport     uint
+	Pidfilepath    string
+	Scriptfilepath string
+	Urlpath        string
+	Urlport        uint
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,
@@ -45,7 +47,8 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 		data, err := ioutil.ReadFile(path.Join(configdir.Name(),
 			configfile.Name()))
 		if err != nil {
-			logger.Printf("Unable to read file %q: %s", configfile.Name(), err)
+			logger.Printf("Unable to read file %q: %s",
+				configfile.Name(), err)
 			return err
 		}
 		c := testConfig{}
@@ -71,6 +74,12 @@ func makeProber(testname string, c *testConfig,
 			return nil
 		}
 		return pidprober.Makepidprober(testname, pidpath)
+	case "script":
+		scriptpath := c.Specs.Scriptfilepath
+		if scriptpath == "" {
+			return nil
+		}
+		return scriptprober.Makescriptprober(testname, scriptpath)
 	default:
 		logger.Println("Test type %s not supported", c.Testtype)
 		return nil
