@@ -19,9 +19,9 @@ type testConfig struct {
 }
 
 type testSpecs struct {
-	Pathname    	string
-	Urlpath		string	`yaml:"url-path"`
-	Urlport		uint	`yaml:"url-port"`
+	Pathname string
+	Urlpath  string `yaml:"url-path"`
+	Urlport  uint   `yaml:"url-port"`
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,

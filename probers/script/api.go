@@ -7,7 +7,7 @@ import (
 type scriptconfig struct {
 	scriptname     string
 	scriptfilepath string
-	runSuccessful  bool
+	healthy        bool
 	exitError      string
 }
 

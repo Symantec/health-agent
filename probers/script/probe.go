@@ -8,16 +8,16 @@ import (
 
 func (p *scriptconfig) probe() error {
 	if _, err := os.Stat(p.scriptfilepath); os.IsNotExist(err) {
-		p.runSuccessful = false
+		p.healthy = false
 		p.exitError = fmt.Sprint(err)
 		return err
 	}
 	if err := exec.Command(p.scriptfilepath).Run(); err != nil {
-		p.runSuccessful = false
+		p.healthy = false
 		p.exitError = fmt.Sprint(err)
 		return err
 	}
-	p.runSuccessful = true
+	p.healthy = true
 	p.exitError = ""
 	return nil
 }
