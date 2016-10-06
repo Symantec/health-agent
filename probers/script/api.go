@@ -5,10 +5,10 @@ import (
 )
 
 type scriptconfig struct {
-	scriptname	string
-	scriptfilepath	string
-	runSuccessful	bool
-	exitError	string
+	scriptname     string
+	scriptfilepath string
+	runSuccessful  bool
+	exitError      string
 }
 
 func (p *scriptconfig) Register(dir *tricorder.DirectorySpec) error {

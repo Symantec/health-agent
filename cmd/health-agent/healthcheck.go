@@ -14,15 +14,14 @@ import (
 
 type testConfig struct {
 	Testtype  string `yaml:"type"`
-	Probefreq uint8  `yaml:omitempty`
+	Probefreq uint8  `yaml:"probe-freq"`
 	Specs     testSpecs
 }
 
 type testSpecs struct {
-	Pidfilepath    string
-	Scriptfilepath string
-	Urlpath        string
-	Urlport        uint
+	Pathname    	string
+	Urlpath		string	`yaml:"url-path"`
+	Urlport		uint	`yaml:"url-port"`
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,
@@ -69,13 +68,13 @@ func makeProber(testname string, c *testConfig,
 	logger *log.Logger) libprober.RegisterProber {
 	switch c.Testtype {
 	case "pid":
-		pidpath := c.Specs.Pidfilepath
+		pidpath := c.Specs.Pathname
 		if pidpath == "" {
 			return nil
 		}
 		return pidprober.Makepidprober(testname, pidpath)
 	case "script":
-		scriptpath := c.Specs.Scriptfilepath
+		scriptpath := c.Specs.Pathname
 		if scriptpath == "" {
 			return nil
 		}
