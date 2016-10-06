@@ -68,7 +68,7 @@ func (p *prober) findGateway() error {
 
 func intToIP(ip uint32) net.IP {
 	result := make(net.IP, 4)
-	for i := range result {
+	for i, _ := range result {
 		result[i] = byte(ip >> uint(8*i))
 	}
 	return result
