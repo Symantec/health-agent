@@ -24,12 +24,13 @@ type RegisterProber interface {
 type proberType struct {
 	prober                prober.Prober
 	probeInterval         time.Duration
+	probeStartTime        time.Time
 	probeTimeDistribution *tricorder.CumulativeDistribution
 }
 
 // ProberList defines a type which manages a list of Probers.
 type ProberList struct {
-	probers               []proberType
+	probers               []*proberType
 	proberPath            string
 	probeStartTime        time.Time
 	probeTimeDistribution *tricorder.CumulativeDistribution
