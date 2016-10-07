@@ -4,7 +4,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
-type scriptconfig struct {
+type testprogconfig struct {
 	testname  string
 	filepath  string
 	healthy   bool
@@ -14,17 +14,17 @@ type scriptconfig struct {
 	stderr    string
 }
 
-func (p *scriptconfig) Register(dir *tricorder.DirectorySpec) error {
+func (p *testprogconfig) Register(dir *tricorder.DirectorySpec) error {
 	return p.register(dir)
 }
 
-func (p *scriptconfig) Probe() error {
+func (p *testprogconfig) Probe() error {
 	return p.probe()
 }
 
-func Makescriptprober(testname string, scriptpath string) *scriptconfig {
-	p := new(scriptconfig)
+func Maketestprogprober(testname string, testprogpath string) *testprogconfig {
+	p := new(testprogconfig)
 	p.testname = testname
-	p.filepath = scriptpath
+	p.filepath = testprogpath
 	return p
 }

@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func (p *scriptconfig) probe() error {
+func (p *testprogconfig) probe() error {
 	if _, err := os.Stat(p.filepath); os.IsNotExist(err) {
 		p.sethealthy(false, err)
 		return err
@@ -57,7 +57,7 @@ func (p *scriptconfig) probe() error {
 	return nil
 }
 
-func (p *scriptconfig) sethealthy(val bool, err error) {
+func (p *testprogconfig) sethealthy(val bool, err error) {
 	p.healthy = val
 	p.exitError = fmt.Sprint(err)
 }

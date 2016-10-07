@@ -5,7 +5,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder/units"
 )
 
-func (p *scriptconfig) register(dir *tricorder.DirectorySpec) error {
+func (p *testprogconfig) register(dir *tricorder.DirectorySpec) error {
 	if err := dir.RegisterMetric("healthy", &p.healthy,
 		units.None, "Healthy?"); err != nil {
 		return err

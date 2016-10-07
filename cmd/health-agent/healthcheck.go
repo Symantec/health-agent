@@ -3,7 +3,7 @@ package main
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
-	scriptprober "github.com/Symantec/health-agent/probers/testprog"
+	testprogprober "github.com/Symantec/health-agent/probers/testprog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -73,12 +73,12 @@ func makeProber(testname string, c *testConfig,
 			return nil
 		}
 		return pidprober.Makepidprober(testname, pidpath)
-	case "script":
-		scriptpath := c.Specs.Pathname
-		if scriptpath == "" {
+	case "testprog":
+		testprogpath := c.Specs.Pathname
+		if testprogpath == "" {
 			return nil
 		}
-		return scriptprober.Makescriptprober(testname, scriptpath)
+		return testprogprober.Maketestprogprober(testname, testprogpath)
 	default:
 		logger.Println("Test type %s not supported", c.Testtype)
 		return nil
