@@ -3,6 +3,7 @@ package main
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
+	testprogprober "github.com/Symantec/health-agent/probers/testprog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -13,14 +14,14 @@ import (
 
 type testConfig struct {
 	Testtype  string `yaml:"type"`
-	Probefreq uint8  `yaml:omitempty`
+	Probefreq uint8  `yaml:"probe-freq"`
 	Specs     testSpecs
 }
 
 type testSpecs struct {
-	Pidfilepath string
-	Urlpath     string
-	Urlport     uint
+	Pathname string
+	Urlpath  string `yaml:"url-path"`
+	Urlport  uint   `yaml:"url-port"`
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,
@@ -45,7 +46,8 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 		data, err := ioutil.ReadFile(path.Join(configdir.Name(),
 			configfile.Name()))
 		if err != nil {
-			logger.Printf("Unable to read file %q: %s", configfile.Name(), err)
+			logger.Printf("Unable to read file %q: %s",
+				configfile.Name(), err)
 			return err
 		}
 		c := testConfig{}
@@ -66,11 +68,17 @@ func makeProber(testname string, c *testConfig,
 	logger *log.Logger) libprober.RegisterProber {
 	switch c.Testtype {
 	case "pid":
-		pidpath := c.Specs.Pidfilepath
+		pidpath := c.Specs.Pathname
 		if pidpath == "" {
 			return nil
 		}
 		return pidprober.Makepidprober(testname, pidpath)
+	case "testprog":
+		testprogpath := c.Specs.Pathname
+		if testprogpath == "" {
+			return nil
+		}
+		return testprogprober.Maketestprogprober(testname, testprogpath)
 	default:
 		logger.Println("Test type %s not supported", c.Testtype)
 		return nil
