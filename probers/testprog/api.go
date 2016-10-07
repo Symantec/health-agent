@@ -1,14 +1,17 @@
-package script
+package testprog
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
 type scriptconfig struct {
-	scriptname     string
-	scriptfilepath string
-	healthy        bool
-	exitError      string
+	testname  string
+	filepath  string
+	healthy   bool
+	exitCode  int
+	exitError string
+	stdout    string
+	stderr    string
 }
 
 func (p *scriptconfig) Register(dir *tricorder.DirectorySpec) error {
@@ -21,7 +24,7 @@ func (p *scriptconfig) Probe() error {
 
 func Makescriptprober(testname string, scriptpath string) *scriptconfig {
 	p := new(scriptconfig)
-	p.scriptname = testname
-	p.scriptfilepath = scriptpath
+	p.testname = testname
+	p.filepath = scriptpath
 	return p
 }

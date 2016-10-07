@@ -3,7 +3,7 @@ package main
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
-	scriptprober "github.com/Symantec/health-agent/probers/script"
+	scriptprober "github.com/Symantec/health-agent/probers/testprog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
