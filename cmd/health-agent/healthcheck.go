@@ -4,6 +4,7 @@ import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
 	testprogprober "github.com/Symantec/health-agent/probers/testprog"
+	urlprober "github.com/Symantec/health-agent/probers/url"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -21,7 +22,7 @@ type testConfig struct {
 type testSpecs struct {
 	Pathname string
 	Urlpath  string `yaml:"url-path"`
-	Urlport  uint   `yaml:"url-port"`
+	Urlport  int    `yaml:"url-port"`
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,
@@ -79,8 +80,12 @@ func makeProber(testname string, c *testConfig,
 			return nil
 		}
 		return testprogprober.Maketestprogprober(testname, testprogpath)
+	case "url":
+		urlpath := c.Specs.Urlpath
+		urlport := c.Specs.Urlport
+		return urlprober.Makeurlprober(testname, urlpath, urlport)
 	default:
-		logger.Println("Test type %s not supported", c.Testtype)
+		logger.Printf("Test type %s not supported", c.Testtype)
 		return nil
 	}
 }
