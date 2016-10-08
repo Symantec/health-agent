@@ -83,9 +83,6 @@ func makeProber(testname string, c *testConfig,
 	case "url":
 		urlpath := c.Specs.Urlpath
 		urlport := c.Specs.Urlport
-		if urlpath == "" {
-			return nil
-		}
 		return urlprober.Makeurlprober(testname, urlpath, urlport)
 	default:
 		logger.Printf("Test type %s not supported", c.Testtype)

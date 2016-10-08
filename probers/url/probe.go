@@ -3,24 +3,18 @@ package url
 import (
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 func (p *urlconfig) probe() error {
-	urlpath := p.urlpath
-	if !strings.HasPrefix(urlpath, "http://") {
-		urlpath = "http://" + urlpath
-	}
-	urlpath += ":" + strconv.Itoa(p.urlport)
-	res, err := http.Get(urlpath)
+	address := fmt.Sprintf("http://localhost:%d%s", p.urlport, p.urlpath)
+	res, err := http.Get(address)
 	if err != nil {
 		p.healthy = false
 		p.error = fmt.Sprintf("%s", err)
 		return err
 	}
 	p.statusCode = res.StatusCode
-	if strings.Contains(res.Status, "OK") {
+	if res.StatusCode == 200 {
 		p.healthy = true
 		p.error = ""
 	} else {
