@@ -92,18 +92,19 @@ func (p *prober) processMountLine(line string) error {
 	if fs.probed {
 		return nil
 	}
-	if fd, err := syscall.Open(mountPoint, syscall.O_RDONLY, 0); err != nil {
+	fd, err := syscall.Open(mountPoint, syscall.O_RDONLY, 0)
+	if err != nil {
 		return errors.New(fmt.Sprintf("error opening: %s %s", mountPoint, err))
-	} else {
-		defer syscall.Close(fd)
-		var statbuf syscall.Statfs_t
-		if err := syscall.Fstatfs(fd, &statbuf); err != nil {
-			return err
-		}
-		fs.available = statbuf.Bavail * uint64(statbuf.Bsize)
-		fs.free = statbuf.Bfree * uint64(statbuf.Bsize)
-		fs.size = statbuf.Blocks * uint64(statbuf.Bsize)
 	}
+	defer syscall.Close(fd)
+	var statbuf syscall.Statfs_t
+	if err := syscall.Fstatfs(fd, &statbuf); err != nil {
+		return err
+	}
+	fs.available = statbuf.Bavail * uint64(statbuf.Bsize)
+	fs.free = statbuf.Bfree * uint64(statbuf.Bsize)
+	fs.size = statbuf.Blocks * uint64(statbuf.Bsize)
+
 	fs.device = device
 	fs.options = fsOptions
 	fs.writable = strings.HasPrefix(fs.options, "rw,")
