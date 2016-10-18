@@ -13,6 +13,7 @@ func (p *urlconfig) probe() error {
 		p.error = fmt.Sprintf("%s", err)
 		return err
 	}
+	defer res.Body.Close()
 	p.statusCode = res.StatusCode
 	if res.StatusCode == 200 {
 		p.healthy = true
