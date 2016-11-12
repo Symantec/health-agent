@@ -10,7 +10,7 @@ func (p *dnsconfig) probe() error {
 	if _, err := net.LookupIP(p.hostname); err != nil {
 		p.healthy = false
 	}
-	p.latency = time.Since(starttime) / time.Millisecond
+	p.latency = int64(time.Since(starttime) / time.Millisecond)
 	p.healthy = true
 	return nil
 }
