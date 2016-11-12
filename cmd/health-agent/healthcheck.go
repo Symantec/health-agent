@@ -2,6 +2,7 @@ package main
 
 import (
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
+	dnsprober "github.com/Symantec/health-agent/probers/dns"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
 	testprogprober "github.com/Symantec/health-agent/probers/testprog"
 	urlprober "github.com/Symantec/health-agent/probers/url"
@@ -23,6 +24,7 @@ type testSpecs struct {
 	Pathname string
 	Urlpath  string `yaml:"url-path"`
 	Urlport  int    `yaml:"url-port"`
+	Hostname string `yaml:"hostname"`
 }
 
 func setupHealthchecks(configDir string, pl *libprober.ProberList,
@@ -68,6 +70,9 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 func makeProber(testname string, c *testConfig,
 	logger *log.Logger) libprober.RegisterProber {
 	switch c.Testtype {
+	case "dns":
+		hostname := c.Specs.Hostname
+		return dnsprober.Makednsprober(testname, hostname)
 	case "pid":
 		pidpath := c.Specs.Pathname
 		if pidpath == "" {
