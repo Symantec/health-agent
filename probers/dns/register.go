@@ -10,12 +10,8 @@ func (p *dnsconfig) register(dir *tricorder.DirectorySpec) error {
 		"Is dns reachable?"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("latency", &p.latency, units.None,
-		"Dns latency"); err != nil {
-		return err
-	}
-	if err := dir.RegisterMetric("err", &p.err, units.None,
-		"Dns latency"); err != nil {
+	if err := dir.RegisterMetric("latency", &p.latency, units.Millisecond,
+		"Dns latency in millisec"); err != nil {
 		return err
 	}
 	return nil

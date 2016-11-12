@@ -6,16 +6,11 @@ import (
 )
 
 func (p *dnsconfig) probe() error {
-	hostname := p.hostname
 	starttime := time.Now()
-	conn, err := net.Dial("tcp", hostname)
-	p.latency = time.Since(starttime).String()
-	if err != nil {
+	if _, err := net.LookupIP(p.hostname); err != nil {
 		p.healthy = false
-		p.err = err
 	}
-	defer conn.Close()
+	p.latency = time.Since(starttime) / time.Millisecond
 	p.healthy = true
-	p.err = nil
 	return nil
 }

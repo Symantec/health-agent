@@ -8,8 +8,7 @@ type dnsconfig struct {
 	testname string
 	hostname string
 	healthy  bool
-	latency  string
-	err      string
+	latency  int64
 }
 
 func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {
