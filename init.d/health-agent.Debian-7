@@ -71,7 +71,8 @@ do_start ()
     fi
     chown "$USERNAME" "$LOG_DIR"
     start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
-		      --exec "$DAEMON" --chuid "$USERNAME" --make-pidfile -- \
+		      --exec "$DAEMON" --chuid "$USERNAME" --make-pidfile \
+		      --nicelevel 1 -- \
 		      $PROG_ARGS
 }
 
