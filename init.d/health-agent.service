@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/local/sbin/health-agent
+Nice=1
 Restart=always
 RestartSec=1
 
