@@ -72,7 +72,7 @@ func makeProber(testname string, c *testConfig,
 	switch c.Testtype {
 	case "dns":
 		hostname := c.Specs.Hostname
-		return dnsprober.New(testname, string[](hostname))
+		return dnsprober.New(testname, hostname)
 	case "pid":
 		pidpath := c.Specs.Pathname
 		if pidpath == "" {

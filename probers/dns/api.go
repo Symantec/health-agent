@@ -7,7 +7,7 @@ import (
 
 type dnsconfig struct {
 	testname string
-	hostnames string[]
+	hostname string
 	healthy  bool
 	latency  time.Duration
 }
@@ -20,7 +20,7 @@ func (p *dnsconfig) Probe() error {
 	return p.probe()
 }
 
-func New(testname string, hostnames string[]) *dnsconfig {
-	return &dnsconfig{testname: testname, hostnames: hostnames}
+func New(testname, hostname string) *dnsconfig {
+	return &dnsconfig{testname: testname, hostname: hostname}
 
 }
