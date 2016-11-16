@@ -2,13 +2,14 @@ package dns
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
+	"time"
 )
 
 type dnsconfig struct {
 	testname string
-	hostname string
+	hostnames string[]
 	healthy  bool
-	latency  int64
+	latency  time.Duration
 }
 
 func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {
@@ -19,9 +20,7 @@ func (p *dnsconfig) Probe() error {
 	return p.probe()
 }
 
-func Makednsprober(testname, hostname string) *dnsconfig {
-	p := new(dnsconfig)
-	p.testname = testname
-	p.hostname = hostname
-	return p
+func New(testname string, hostnames string[]) *dnsconfig {
+	return &dnsconfig{testname: testname, hostnames: hostnames}
+
 }
