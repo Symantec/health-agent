@@ -2,14 +2,13 @@ package dns
 
 import (
 	"github.com/Symantec/tricorder/go/tricorder"
-	"time"
 )
 
 type dnsconfig struct {
 	testname string
 	hostname string
 	healthy  bool
-	latency  time.Duration
+	dnsLatencyDistribution  *tricorder.CumulativeDistribution
 }
 
 func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {

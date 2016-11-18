@@ -12,6 +12,7 @@ func (p *dnsconfig) probe() error {
 	} else {
 		p.healthy = true
 	}
-	p.latency = time.Since(start)
+	latency := time.Since(start)
+	p.dnsLatencyDistribution.Add(latency)
 	return nil
 }

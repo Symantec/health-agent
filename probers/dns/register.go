@@ -10,8 +10,10 @@ func (p *dnsconfig) register(dir *tricorder.DirectorySpec) error {
 		"Is DNS reachable?"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("latency", &p.latency, units.Second,
-		"DNS latency"); err != nil {
+	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 10e3)
+	p.dnsLatencyDistribution = latencyBucketer.NewCumulativeDistribution()
+	if err := dir.RegisterMetric("latency", p.dnsLatencyDistribution,
+		units.Millisecond, "DNS latency"); err != nil {
 		return err
 	}
 	return nil
