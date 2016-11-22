@@ -5,10 +5,10 @@ import (
 )
 
 type dnsconfig struct {
-	testname string
-	hostname string
-	healthy  bool
-	dnsLatencyDistribution  *tricorder.CumulativeDistribution
+	testname               string
+	hostname               string
+	healthy                bool
+	dnsLatencyDistribution *tricorder.CumulativeDistribution
 }
 
 func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {
@@ -21,5 +21,4 @@ func (p *dnsconfig) Probe() error {
 
 func New(testname, hostname string) *dnsconfig {
 	return &dnsconfig{testname: testname, hostname: hostname}
-
 }
