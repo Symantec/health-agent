@@ -66,7 +66,7 @@ fi
 do_start ()
 {
     if [ -z "$USERNAME" ]; then
-	"$DAEMON" $PROG_ARGS
+	nice -n 1 "$DAEMON" $PROG_ARGS
 	return
     fi
     chown "$USERNAME" "$LOG_DIR"
