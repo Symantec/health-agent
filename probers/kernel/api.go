@@ -6,6 +6,7 @@ import (
 )
 
 type prober struct {
+	hostname               string
 	randomEntropyAvailable uint64
 }
 

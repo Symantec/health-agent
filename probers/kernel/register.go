@@ -11,6 +11,10 @@ var versionFilename string = "/proc/version"
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := new(prober)
+	if err := dir.RegisterMetric("hostname", &p.hostname, units.None,
+		"system hostname"); err != nil {
+		panic(err)
+	}
 	version := getVersion()
 	if err := dir.RegisterMetric("version/raw", &version, units.None,
 		"raw kernel version"); err != nil {

@@ -9,6 +9,11 @@ import (
 var randomEntropyFilename = "/proc/sys/kernel/random/entropy_avail"
 
 func (p *prober) probe() error {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+	p.hostname = hostname
 	file, err := os.Open(randomEntropyFilename)
 	if err != nil {
 		return err
