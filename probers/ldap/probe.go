@@ -18,10 +18,10 @@ func (p *ldapconfig) probe() error {
 			p.healthy = false
 			continue
 		}
-		latency := time.Since(start)
-		p.ldapLatencyDistribution.Add(latency)
 		defer conn.Close()
 		err = conn.Bind(p.bindDN, p.bindPassword)
+		latency := time.Since(start)
+		p.ldapLatencyDistribution.Add(latency)
 		if err != nil {
 			p.healthy = false
 		} else {
