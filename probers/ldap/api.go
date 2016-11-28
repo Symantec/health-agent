@@ -30,4 +30,3 @@ func New(testname string, probefreq uint8, hostnames []string,
 		bindDN:       binddn,
 		bindPassword: bindpwd}
 }
-

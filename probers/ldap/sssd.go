@@ -2,23 +2,19 @@ package ldap
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"regexp"
 	"strings"
 )
 
-func Makeldapprober(testname string, sssdconf string,
+func Makeldapprober(testname string, conf io.ReadCloser,
 	probefreq uint8) *ldapconfig {
+	defer conf.Close()
 	comment := regexp.MustCompile("#+.*")
 	uri := regexp.MustCompile("ldap_uri ?= ?(.*)")
 	bind := regexp.MustCompile("ldap_default_bind_dn ?= ?(.*)")
 	tok := regexp.MustCompile("ldap_default_authtok ?= ?(.*)")
 
-	conf, err := os.Open(sssdconf)
-	if err != nil {
-		panic(err)
-	}
-	defer conf.Close()
 	var hostnames []string
 	var val, binddn, bindpwd string
 	scanner := bufio.NewScanner(conf)
