@@ -1,6 +1,7 @@
 package main
 
 import (
+	fsutil "github.com/Symantec/Dominator/lib/fsutil"
 	libprober "github.com/Symantec/health-agent/lib/proberlist"
 	dnsprober "github.com/Symantec/health-agent/probers/dns"
 	ldapprober "github.com/Symantec/health-agent/probers/ldap"
@@ -77,7 +78,10 @@ func makeProber(testname string, c *testConfig,
 		return dnsprober.New(testname, hostname)
 	case "ldap":
 		sssd := c.Specs.SssdConfig
-		return ldapprober.Makeldapprober(testname, sssd, c.Probefreq)
+		ch := fsutil.WatchFile(sssd, logger)
+		file := <-ch
+		fsutil.WatchFileStop()
+		return ldapprober.Makeldapprober(testname, file, c.Probefreq)
 	case "pid":
 		pidpath := c.Specs.Pathname
 		if pidpath == "" {
