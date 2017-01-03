@@ -5,6 +5,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 	"io"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -30,10 +31,11 @@ type proberType struct {
 
 // ProberList defines a type which manages a list of Probers.
 type ProberList struct {
-	probers               []*proberType
 	proberPath            string
 	probeStartTime        time.Time
 	probeTimeDistribution *tricorder.CumulativeDistribution
+	lock                  sync.Mutex
+	probers               []*proberType
 }
 
 // New returns a new ProberList. Only one should be created per application.

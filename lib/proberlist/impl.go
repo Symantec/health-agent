@@ -65,12 +65,22 @@ func (pl *ProberList) addProber(genericProber prober.Prober, path string,
 			panic(err)
 		}
 	}
+	pl.lock.Lock()
+	defer pl.lock.Unlock()
 	pl.probers = append(pl.probers, newProber)
+}
+
+func (pl *ProberList) getProbers() []*proberType {
+	pl.lock.Lock()
+	defer pl.lock.Unlock()
+	result := make([]*proberType, len(pl.probers))
+	copy(result, pl.probers)
+	return result
 }
 
 func (pl *ProberList) startProbing(defaultProbeInterval uint,
 	logger *log.Logger) {
-	for _, p := range pl.probers {
+	for _, p := range pl.getProbers() {
 		if p.probeInterval > 0 {
 			go p.proberLoop(defaultProbeInterval, logger)
 		}
@@ -88,8 +98,10 @@ func (pl *ProberList) proberLoop(probeInterval uint, logger *log.Logger) {
 }
 
 func (pl *ProberList) probe(logger *log.Logger) {
+	// TODO: Possible data races with tricorder. Assigning a time
+	// is not atomic.
 	pl.probeStartTime = time.Now()
-	for _, p := range pl.probers {
+	for _, p := range pl.getProbers() {
 		if p.probeInterval > 0 { // Handled by a dedicated goroutine.
 			continue
 		}
@@ -103,7 +115,7 @@ func (pl *ProberList) probe(logger *log.Logger) {
 }
 
 func (pl *ProberList) writeHtml(writer io.Writer) {
-	for _, p := range pl.probers {
+	for _, p := range pl.getProbers() {
 		if htmler, ok := p.prober.(HtmlWriter); ok {
 			htmler.WriteHtml(writer)
 			fmt.Fprintln(writer, "<br>")
