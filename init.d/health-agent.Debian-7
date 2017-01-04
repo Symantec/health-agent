@@ -22,7 +22,9 @@ log_daemon_msg ()
     echo "$@"
 }
 
-. /lib/lsb/init-functions
+if [ -r /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+fi
 
 umask 022
 
