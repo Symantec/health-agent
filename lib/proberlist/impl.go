@@ -34,7 +34,11 @@ func newProberList(proberPath string) *ProberList {
 
 func (pl *ProberList) add(registerProber RegisterProber, path string,
 	probeInterval uint8) {
-	if err := registerProber.Register(mkdir(path)); err != nil {
+	dirSpec := mkdir(path)
+	if err := registerProber.Register(dirSpec); err != nil {
+		panic(err)
+	}
+	if err := dirSpec.Register(); err != nil {
 		panic(err)
 	}
 	pl.addProber(registerProber, path, probeInterval)
@@ -152,7 +156,7 @@ func (p *proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
 }
 
 func mkdir(name string) *tricorder.DirectorySpec {
-	dir, err := tricorder.RegisterDirectory(name)
+	dir, err := tricorder.CreateUnregisteredDirectory(name)
 	if err != nil {
 		panic(err)
 	}

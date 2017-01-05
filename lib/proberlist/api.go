@@ -14,6 +14,8 @@ type HtmlWriter interface {
 	WriteHtml(writer io.Writer)
 }
 
+// RegisterFunc creates a prober. A RegisterFunc may return nil to signal
+// that no prober could be created.
 type RegisterFunc func(dir *tricorder.DirectorySpec) prober.Prober
 
 // RegisterProber defines a type that can register a Prober.
@@ -58,7 +60,14 @@ func (pl *ProberList) Add(registerProber RegisterProber, path string,
 // interval in seconds is given by probeInterval.
 func (pl *ProberList) CreateAndAdd(registerFunc RegisterFunc, path string,
 	probeInterval uint8) {
-	pl.addProber(registerFunc(mkdir(path)), path, probeInterval)
+	dirSpec := mkdir(path)
+	p := registerFunc(dirSpec)
+	if p != nil {
+		if err := dirSpec.Register(); err != nil {
+			panic(err)
+		}
+		pl.addProber(p, path, probeInterval)
+	}
 }
 
 // StartProbing creates one or more goroutines which will run probes in an
