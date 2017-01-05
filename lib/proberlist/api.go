@@ -47,7 +47,8 @@ func New(proberPath string) *ProberList {
 
 // Add registers a new RegisterProber. The path for the metrics for the Prober
 // is given by path. Its Register method is called once. The preferred probe
-// interval in seconds is given by probeInterval.
+// interval in seconds is given by probeInterval. If registerProber is nil then
+// nothing is done.
 func (pl *ProberList) Add(registerProber RegisterProber, path string,
 	probeInterval uint8) {
 	pl.add(registerProber, path, probeInterval)
