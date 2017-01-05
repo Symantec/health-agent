@@ -34,6 +34,9 @@ func newProberList(proberPath string) *ProberList {
 
 func (pl *ProberList) add(registerProber RegisterProber, path string,
 	probeInterval uint8) {
+	if registerProber == nil {
+		return
+	}
 	if err := registerProber.Register(mkdir(path)); err != nil {
 		panic(err)
 	}
