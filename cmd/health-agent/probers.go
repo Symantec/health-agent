@@ -16,7 +16,7 @@ import (
 
 func setupProbers() (*proberlist.ProberList, error) {
 	pl := proberlist.New("/probers")
-	go func() { pl.Add(aws.New(), "/sys/aws", 0) }()
+	go func() { pl.Add(aws.New(), "/sys/cloud/aws", 0) }()
 	pl.CreateAndAdd(filesystems.Register, "/sys/fs", 0)
 	pl.CreateAndAdd(scheduler.Register, "/sys/sched", 0)
 	pl.CreateAndAdd(memory.Register, "/sys/memory", 0)
