@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 type testConfig struct {
@@ -78,9 +79,11 @@ func makeProber(testname string, c *testConfig,
 		return dnsprober.New(testname, hostname)
 	case "ldap":
 		sssd := c.Specs.SssdConfig
-		ch := fsutil.WatchFile(sssd, logger)
-		file := <-ch
-		fsutil.WatchFileStop()
+		file, err := fsutil.WaitFile(sssd, time.Minute*5)
+		if err != nil {
+			logger.Println(err)
+			return nil
+		}
 		return ldapprober.Makeldapprober(testname, file, c.Probefreq)
 	case "pid":
 		pidpath := c.Specs.Pathname
