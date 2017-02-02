@@ -13,18 +13,22 @@ type urlconfig struct {
 	error      string
 }
 
-func (p *urlconfig) Register(dir *tricorder.DirectorySpec) error {
-	return p.register(dir)
-}
-
-func (p *urlconfig) Probe() error {
-	return p.probe()
-}
-
 func Makeurlprober(testname string, urlpath string, urlport int) *urlconfig {
 	p := new(urlconfig)
 	p.testname = testname
 	p.urlpath = urlpath
 	p.urlport = urlport
 	return p
+}
+
+func (p *urlconfig) HealthCheck() bool {
+	return p.healthy
+}
+
+func (p *urlconfig) Probe() error {
+	return p.probe()
+}
+
+func (p *urlconfig) Register(dir *tricorder.DirectorySpec) error {
+	return p.register(dir)
 }

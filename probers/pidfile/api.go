@@ -12,17 +12,21 @@ type pidconfig struct {
 	pidExists     bool
 }
 
-func (p *pidconfig) Register(dir *tricorder.DirectorySpec) error {
-	return p.register(dir)
+func Makepidprober(testname string, pidpath string) *pidconfig {
+	p := new(pidconfig)
+	p.processname = testname
+	p.pidfilepath = pidpath
+	return p
+}
+
+func (p *pidconfig) HealthCheck() bool {
+	return p.healthy
 }
 
 func (p *pidconfig) Probe() error {
 	return p.probe()
 }
 
-func Makepidprober(testname string, pidpath string) *pidconfig {
-	p := new(pidconfig)
-	p.processname = testname
-	p.pidfilepath = pidpath
-	return p
+func (p *pidconfig) Register(dir *tricorder.DirectorySpec) error {
+	return p.register(dir)
 }
