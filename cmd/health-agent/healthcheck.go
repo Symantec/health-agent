@@ -78,9 +78,8 @@ func setupHealthchecks(configDir string, pl *proberlist.ProberList,
 	var allHealthy bool
 	list := tricorder.NewList([]string{}, tricorder.ImmutableSlice)
 	group := tricorder.NewGroup()
-	err = tricorder.RegisterMetricInGroup(path.Join(topDir, "*", "healthy"),
-		&allHealthy, group, units.None,
-		"If true, all health checks are healthy")
+	err = group.RegisterMetric(path.Join(topDir, "*", "healthy"), &allHealthy,
+		units.None, "If true, all health checks are healthy")
 	if err != nil {
 		return err
 	}
