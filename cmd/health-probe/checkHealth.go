@@ -3,11 +3,19 @@ package main
 import (
 	"errors"
 	"github.com/Symantec/tricorder/go/tricorder/messages"
+	"net"
 	"net/rpc"
 	"time"
 )
 
 func checkHealth(address string) ([]string, error) {
+	// There is no timeout or context variant for rpc.DialHTTP(), so make a
+	// dummy connection to work around this.
+	conn, err := net.DialTimeout("tcp", address, time.Second*5)
+	if err != nil {
+		return nil, err
+	}
+	conn.Close()
 	client, err := rpc.DialHTTP("tcp", address)
 	if err != nil {
 		return nil, err
