@@ -1,13 +1,16 @@
 package main
 
 import (
-	fsutil "github.com/Symantec/Dominator/lib/fsutil"
-	libprober "github.com/Symantec/health-agent/lib/proberlist"
+	"github.com/Symantec/Dominator/lib/fsutil"
+	libprober "github.com/Symantec/health-agent/lib/prober"
+	"github.com/Symantec/health-agent/lib/proberlist"
 	dnsprober "github.com/Symantec/health-agent/probers/dns"
 	ldapprober "github.com/Symantec/health-agent/probers/ldap"
 	pidprober "github.com/Symantec/health-agent/probers/pidfile"
 	testprogprober "github.com/Symantec/health-agent/probers/testprog"
 	urlprober "github.com/Symantec/health-agent/probers/url"
+	"github.com/Symantec/tricorder/go/tricorder"
+	"github.com/Symantec/tricorder/go/tricorder/units"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -31,7 +34,7 @@ type testSpecs struct {
 	SssdConfig string `yaml:"sssd-config"`
 }
 
-func setupHealthchecks(configDir string, pl *libprober.ProberList,
+func setupHealthchecks(configDir string, pl *proberlist.ProberList,
 	logger *log.Logger) error {
 	topDir := "/health-checks"
 	configdir, err := os.Open(path.Join(configDir, "tests.d"))
@@ -46,6 +49,7 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 	if err != nil {
 		return err
 	}
+	healthCheckers := make(map[string]libprober.HealthChecker)
 	for _, configfile := range configfiles {
 		if configfile.IsDir() {
 			continue
@@ -66,13 +70,44 @@ func setupHealthchecks(configDir string, pl *libprober.ProberList,
 		testname := strings.Split(configfile.Name(), ".")[0]
 		if prober := makeProber(testname, &c, logger); prober != nil {
 			pl.Add(prober, path.Join(topDir, testname), c.Probefreq)
+			if hc, ok := prober.(libprober.HealthChecker); ok {
+				healthCheckers[testname] = hc
+			}
 		}
 	}
+	var allHealthy bool
+	list := tricorder.NewList([]string{}, tricorder.ImmutableSlice)
+	group := tricorder.NewGroup()
+	err = tricorder.RegisterMetricInGroup(path.Join(topDir, "*", "healthy"),
+		&allHealthy, group, units.None,
+		"If true, all health checks are healthy")
+	if err != nil {
+		return err
+	}
+	err = tricorder.RegisterMetricInGroup(path.Join(topDir, "*",
+		"unhealthy-list"), list, group, units.None,
+		"List of failed health checks")
+	if err != nil {
+		return err
+	}
+	group.RegisterUpdateFunc(func() time.Time {
+		healthy := true
+		var unhealthyList []string
+		for testname, healthChecker := range healthCheckers {
+			if !healthChecker.HealthCheck() {
+				healthy = false
+				unhealthyList = append(unhealthyList, testname)
+			}
+		}
+		allHealthy = healthy
+		list.Change(unhealthyList, tricorder.ImmutableSlice)
+		return time.Now()
+	})
 	return nil
 }
 
 func makeProber(testname string, c *testConfig,
-	logger *log.Logger) libprober.RegisterProber {
+	logger *log.Logger) proberlist.RegisterProber {
 	switch c.Testtype {
 	case "dns":
 		hostname := c.Specs.Hostname
