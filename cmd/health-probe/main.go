@@ -18,7 +18,7 @@ var (
 
 func printUsage() {
 	fmt.Fprintln(os.Stderr,
-		"Usage: health-probe [flags...]")
+		"Usage: health-probe [flags...] ssh-user...")
 	fmt.Fprintln(os.Stderr, "Common flags:")
 	flag.PrintDefaults()
 }
@@ -39,10 +39,13 @@ func main() {
 	errorChannel := make(chan error, 0)
 	go runHealthCheck(address, stopTime, errorChannel)
 	numToHarvest := 1
+	for _, username := range flag.Args() {
+		go runSshCheck(*hostname, username, stopTime, errorChannel)
+		numToHarvest++
+	}
 	checkFailed := false
 	for i := 0; i < numToHarvest; i++ {
-		err := <-errorChannel
-		if err != nil {
+		if err := <-errorChannel; err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			checkFailed = true
 		}
