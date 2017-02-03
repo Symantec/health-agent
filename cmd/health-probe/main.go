@@ -13,9 +13,18 @@ import (
 var (
 	hostname = flag.String("hostname", "localhost",
 		"Hostname of machine to probe")
-	portNum = flag.Uint("portNum", 6910, "Port number of health-agent")
+	portNum       = flag.Uint("portNum", 6910, "Port number of health-agent")
+	probeInterval = flag.Duration("probeInterval", time.Second*5,
+		"Time between probe intervals (min 100 milliseconds)")
 	timeout = flag.Duration("timeout", time.Minute*5, "Time before giving up")
 )
+
+func printUsage() {
+	fmt.Fprintln(os.Stderr,
+		"Usage: health-probe [flags...]")
+	fmt.Fprintln(os.Stderr, "Common flags:")
+	flag.PrintDefaults()
+}
 
 func checkHealth(address string) ([]string, error) {
 	client, err := rpc.DialHTTP("tcp", address)
@@ -52,18 +61,22 @@ func checkHealthTimeout(address string, stopTime time.Time) ([]string, error) {
 		if len(unhealthyList) < 1 && err == nil {
 			return nil, nil
 		}
-		if time.Now().After(stopTime) {
+		if time.Now().Add(*probeInterval).After(stopTime) {
 			return unhealthyList, err
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(*probeInterval)
 	}
 }
 
 func main() {
-	//flag.Usage = printUsage
+	flag.Usage = printUsage
 	flag.Parse()
 	if *hostname == "" {
 		fmt.Fprintf(os.Stderr, "No hostname specified\n")
+		os.Exit(2)
+	}
+	if *probeInterval < time.Millisecond*100 {
+		fmt.Fprintf(os.Stderr, "probeInterval too short\n")
 		os.Exit(2)
 	}
 	address := fmt.Sprintf("%s:%d", *hostname, *portNum)
