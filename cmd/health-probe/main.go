@@ -13,6 +13,8 @@ var (
 	portNum       = flag.Uint("portNum", 6910, "Port number of health-agent")
 	probeInterval = flag.Duration("probeInterval", time.Second*5,
 		"Time between probe intervals (min 100 milliseconds)")
+	sshIdentityFile = flag.String("sshIdentityFile", "",
+		"Optional SSH identify file to use")
 	timeout = flag.Duration("timeout", time.Minute*5, "Time before giving up")
 )
 
@@ -40,7 +42,8 @@ func main() {
 	go runHealthCheck(address, stopTime, errorChannel)
 	numToHarvest := 1
 	for _, username := range flag.Args() {
-		go runSshCheck(*hostname, username, stopTime, errorChannel)
+		go runSshCheck(*hostname, username, *sshIdentityFile, stopTime,
+			errorChannel)
 		numToHarvest++
 	}
 	checkFailed := false

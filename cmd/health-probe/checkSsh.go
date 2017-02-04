@@ -6,15 +6,20 @@ import (
 	"time"
 )
 
-func checkSsh(hostname string, username string) error {
-	cmd := exec.Command("ssh",
+func checkSsh(hostname string, username string, identityFile string) error {
+	args := []string{
 		"-o", "BatchMode=yes",
 		"-o", "CheckHostIP=no",
 		"-o", "ConnectionAttempts=1",
 		"-o", "ConnectTimeout=5",
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
-		username+"@"+hostname, "true")
+	}
+	if identityFile != "" {
+		args = append(args, "-i", identityFile)
+	}
+	args = append(args, username+"@"+hostname, "true")
+	cmd := exec.Command("ssh", args...)
 	err := cmd.Run()
 	if err == nil {
 		return nil
@@ -22,9 +27,10 @@ func checkSsh(hostname string, username string) error {
 	return errors.New("Error logging in as: " + username + ": " + err.Error())
 }
 
-func checkSshTimeout(hostname, username string, stopTime time.Time) error {
+func checkSshTimeout(hostname, username string, identityFile string,
+	stopTime time.Time) error {
 	for {
-		err := checkSsh(hostname, username)
+		err := checkSsh(hostname, username, identityFile)
 		if err == nil {
 			return nil
 		}
@@ -35,7 +41,7 @@ func checkSshTimeout(hostname, username string, stopTime time.Time) error {
 	}
 }
 
-func runSshCheck(hostname string, username string, stopTime time.Time,
-	errorChannel chan<- error) {
-	errorChannel <- checkSshTimeout(hostname, username, stopTime)
+func runSshCheck(hostname string, username string, identityFile string,
+	stopTime time.Time, errorChannel chan<- error) {
+	errorChannel <- checkSshTimeout(hostname, username, identityFile, stopTime)
 }
