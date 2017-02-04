@@ -14,14 +14,6 @@ type ldapconfig struct {
 	ldapLatencyDistribution *tricorder.CumulativeDistribution
 }
 
-func (p *ldapconfig) Register(dir *tricorder.DirectorySpec) error {
-	return p.register(dir)
-}
-
-func (p *ldapconfig) Probe() error {
-	return p.probe()
-}
-
 func New(testname string, probefreq uint8, hostnames []string,
 	binddn string, bindpwd string) *ldapconfig {
 	return &ldapconfig{testname: testname,
@@ -29,4 +21,16 @@ func New(testname string, probefreq uint8, hostnames []string,
 		hostnames:    hostnames,
 		bindDN:       binddn,
 		bindPassword: bindpwd}
+}
+
+func (p *ldapconfig) HealthCheck() bool {
+	return p.healthy
+}
+
+func (p *ldapconfig) Probe() error {
+	return p.probe()
+}
+
+func (p *ldapconfig) Register(dir *tricorder.DirectorySpec) error {
+	return p.register(dir)
 }

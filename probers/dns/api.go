@@ -11,14 +11,18 @@ type dnsconfig struct {
 	dnsLatencyDistribution *tricorder.CumulativeDistribution
 }
 
-func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {
-	return p.register(dir)
+func New(testname, hostname string) *dnsconfig {
+	return &dnsconfig{testname: testname, hostname: hostname}
+}
+
+func (p *dnsconfig) HealthCheck() bool {
+	return p.healthy
 }
 
 func (p *dnsconfig) Probe() error {
 	return p.probe()
 }
 
-func New(testname, hostname string) *dnsconfig {
-	return &dnsconfig{testname: testname, hostname: hostname}
+func (p *dnsconfig) Register(dir *tricorder.DirectorySpec) error {
+	return p.register(dir)
 }

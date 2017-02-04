@@ -14,17 +14,21 @@ type testprogconfig struct {
 	stderr    string
 }
 
-func (p *testprogconfig) Register(dir *tricorder.DirectorySpec) error {
-	return p.register(dir)
+func Maketestprogprober(testname string, testprogpath string) *testprogconfig {
+	p := new(testprogconfig)
+	p.testname = testname
+	p.filepath = testprogpath
+	return p
+}
+
+func (p *testprogconfig) HealthCheck() bool {
+	return p.healthy
 }
 
 func (p *testprogconfig) Probe() error {
 	return p.probe()
 }
 
-func Maketestprogprober(testname string, testprogpath string) *testprogconfig {
-	p := new(testprogconfig)
-	p.testname = testname
-	p.filepath = testprogpath
-	return p
+func (p *testprogconfig) Register(dir *tricorder.DirectorySpec) error {
+	return p.register(dir)
 }
