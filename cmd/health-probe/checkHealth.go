@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Symantec/tricorder/go/tricorder/messages"
 	"net"
 	"net/rpc"
@@ -57,15 +58,20 @@ func checkHealthTimeout(address string, stopTime time.Time) ([]string, error) {
 	}
 }
 
-func runHealthCheck(address string, stopTime time.Time,
-	errorChannel chan<- error) {
+func checkHealthError(address string, stopTime time.Time) error {
 	unhealthyList, err := checkHealthTimeout(address, stopTime)
 	if err != nil {
-		errorChannel <- errors.New("Error checking health: " + err.Error())
+		return errors.New("Error checking health: " + err.Error())
 	}
 	if len(unhealthyList) > 0 {
-		errorChannel <- errors.New(
-			address + " has failing health checks: " + err.Error())
+		return fmt.Errorf("%s has failing health checks: %s ",
+			address, unhealthyList)
+	} else {
+		return nil
 	}
-	errorChannel <- nil
+}
+
+func runHealthCheck(address string, stopTime time.Time,
+	errorChannel chan<- error) {
+	errorChannel <- checkHealthError(address, stopTime)
 }
