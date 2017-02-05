@@ -2,7 +2,9 @@ package url
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func (p *urlconfig) probe() error {
@@ -10,7 +12,7 @@ func (p *urlconfig) probe() error {
 	res, err := http.Get(address)
 	if err != nil {
 		p.healthy = false
-		p.error = fmt.Sprintf("%s", err)
+		p.error = err.Error()
 		return err
 	}
 	defer res.Body.Close()
@@ -20,7 +22,13 @@ func (p *urlconfig) probe() error {
 		p.error = ""
 	} else {
 		p.healthy = false
-		p.error = "Status not OK"
+		p.error = res.Status
+		if body, err := ioutil.ReadAll(res.Body); err == nil {
+			status := strings.TrimSpace(string(body))
+			if status != "" {
+				p.error = status
+			}
+		}
 	}
 	return nil
 }
