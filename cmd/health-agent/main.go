@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Symantec/Dominator/lib/logbuf"
 	"github.com/Symantec/health-agent/httpd"
+	"github.com/Symantec/tricorder/go/healthserver"
 	"log"
 	"net/rpc"
 	"os"
@@ -70,6 +71,7 @@ func doMain() error {
 	}
 	writePidfile()
 	proberList.StartProbing(*probeInterval, logger)
+	healthserver.SetReady()
 	for {
 		select {
 		case <-sighupChannel:
