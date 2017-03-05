@@ -1,12 +1,11 @@
 package proberlist
 
 import (
-	"fmt"
 	"github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
-	"io"
 	"log"
+	"path"
 	"time"
 )
 
@@ -43,26 +42,28 @@ func (pl *ProberList) add(registerProber RegisterProber, path string,
 	pl.addProber(registerProber, path, probeInterval)
 }
 
-func (pl *ProberList) addProber(genericProber prober.Prober, path string,
+func (pl *ProberList) addProber(genericProber prober.Prober, pathname string,
 	probeInterval uint8) {
 	newProber := &proberType{
 		prober:                genericProber,
+		name:                  path.Base(pathname),
 		probeInterval:         time.Duration(probeInterval) * time.Second,
 		probeTimeDistribution: latencyBucketer.NewCumulativeDistribution(),
 	}
-	if err := tricorder.RegisterMetric(pl.proberPath+path+"/probe-duration",
+	if err := tricorder.RegisterMetric(pl.proberPath+pathname+"/probe-duration",
 		newProber.probeTimeDistribution, units.Millisecond,
 		"duration of last probe"); err != nil {
 		panic(err)
 	}
 	if probeInterval > 0 {
-		if err := tricorder.RegisterMetric(pl.proberPath+path+"/probe-interval",
+		if err := tricorder.RegisterMetric(
+			pl.proberPath+pathname+"/probe-interval",
 			&newProber.probeInterval, units.Second,
 			"probe interval"); err != nil {
 			panic(err)
 		}
 		if err := tricorder.RegisterMetric(
-			pl.proberPath+path+"/probe-start-time",
+			pl.proberPath+pathname+"/probe-start-time",
 			&newProber.probeStartTime, units.None,
 			"start time of last probe"); err != nil {
 			panic(err)
@@ -115,15 +116,6 @@ func (pl *ProberList) probe(logger *log.Logger) {
 		p.probeTimeDistribution.Add(time.Since(startTime))
 	}
 	pl.probeTimeDistribution.Add(time.Since(pl.probeStartTime))
-}
-
-func (pl *ProberList) writeHtml(writer io.Writer) {
-	for _, p := range pl.getProbers() {
-		if htmler, ok := p.prober.(HtmlWriter); ok {
-			htmler.WriteHtml(writer)
-			fmt.Fprintln(writer, "<br>")
-		}
-	}
 }
 
 func (p *proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
