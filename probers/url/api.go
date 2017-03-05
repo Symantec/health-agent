@@ -21,6 +21,10 @@ func Makeurlprober(testname string, urlpath string, urlport int) *urlconfig {
 	return p
 }
 
+func (p *urlconfig) GetPort() uint {
+	return uint(p.urlport)
+}
+
 func (p *urlconfig) HealthCheck() bool {
 	return p.healthy
 }
