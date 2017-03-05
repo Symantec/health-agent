@@ -11,6 +11,11 @@ type HtmlWriter interface {
 	WriteHtml(writer io.Writer)
 }
 
+type RequestHtmlWriter interface {
+	HtmlWriter
+	RequestWriteHtml(writer io.Writer, req *http.Request)
+}
+
 var htmlWriters []HtmlWriter
 
 func StartServer(portNum uint) error {
