@@ -9,3 +9,9 @@ type Prober interface {
 type HealthChecker interface {
 	HealthCheck() bool
 }
+
+// DashboardYielder defines a type that can yield a dashboard.
+type DashboardYielder interface {
+	GetPort() uint
+	HealthChecker
+}
