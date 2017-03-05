@@ -5,6 +5,7 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 	"io"
 	"log"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -24,6 +25,7 @@ type RegisterProber interface {
 
 type proberType struct {
 	prober                prober.Prober
+	name                  string
 	probeInterval         time.Duration
 	probeStartTime        time.Time
 	probeTimeDistribution *tricorder.CumulativeDistribution
@@ -62,6 +64,14 @@ func (pl *ProberList) CreateAndAdd(registerFunc RegisterFunc, path string,
 	pl.addProber(registerFunc(mkdir(path)), path, probeInterval)
 }
 
+// RequestWriteHtml will write HTML snippets to writer. Each Prober that
+// implements the RequestHtmlWriter interface will have it's RequestWriteHtml
+// method called. These methods are called in the order in which the Probers
+// were added.
+func (pl *ProberList) RequestWriteHtml(writer io.Writer, req *http.Request) {
+	pl.writeHtml(writer, req)
+}
+
 // StartProbing creates one or more goroutines which will run probes in an
 // infinite loop. The default probe interval in seconds is given by
 // defaultProbeInterval. The logger will be used to log problems.
@@ -74,5 +84,5 @@ func (pl *ProberList) StartProbing(defaultProbeInterval uint,
 // HtmlWriter interface will have it's WriteHtml method called. These methods
 // are called in the order in which the Probers were added.
 func (pl *ProberList) WriteHtml(writer io.Writer) {
-	pl.writeHtml(writer)
+	panic("unimplemented")
 }
