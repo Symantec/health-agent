@@ -18,7 +18,11 @@ func statusHandler(w http.ResponseWriter, req *http.Request) {
 	html.WriteHeader(writer)
 	fmt.Fprintln(writer, "<h3>")
 	for _, htmlWriter := range htmlWriters {
-		htmlWriter.WriteHtml(writer)
+		if requestWriter, ok := htmlWriter.(RequestHtmlWriter); ok {
+			requestWriter.RequestWriteHtml(writer, req)
+		} else {
+			htmlWriter.WriteHtml(writer)
+		}
 	}
 	fmt.Fprintln(writer, "</h3>")
 	fmt.Fprintln(writer, "<hr>")

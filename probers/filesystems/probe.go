@@ -59,6 +59,7 @@ func (p *prober) processMountLine(line string) error {
 				return err
 			}
 		}
+		fs.mountPoint = mountPoint
 		metricsDir, err := fs.dir.RegisterDirectory("METRICS")
 		if err != nil {
 			return err

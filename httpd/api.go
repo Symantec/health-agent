@@ -11,6 +11,11 @@ type HtmlWriter interface {
 	WriteHtml(writer io.Writer)
 }
 
+type RequestHtmlWriter interface {
+	HtmlWriter
+	RequestWriteHtml(writer io.Writer, req *http.Request)
+}
+
 var htmlWriters []HtmlWriter
 
 func StartServer(portNum uint) error {
@@ -19,6 +24,7 @@ func StartServer(portNum uint) error {
 		return err
 	}
 	http.HandleFunc("/", statusHandler)
+	http.HandleFunc("/favicon.ico", func(http.ResponseWriter, *http.Request) {})
 	go http.Serve(listener, nil)
 	return nil
 }

@@ -25,13 +25,13 @@ func register(dir *tricorder.DirectorySpec) *prober {
 		panic(err)
 	}
 	latencyBucketer := tricorder.NewGeometricBucketer(0.1, 10e3)
-	p.gatewayPingTimeDistribution = latencyBucketer.NewDistribution()
+	p.gatewayPingTimeDistribution = latencyBucketer.NewCumulativeDistribution()
 	if err := dir.RegisterMetric("gateway-ping-time",
 		p.gatewayPingTimeDistribution,
 		units.Millisecond, "ping time to gateway"); err != nil {
 		panic(err)
 	}
-	p.gatewayRttDistribution = latencyBucketer.NewDistribution()
+	p.gatewayRttDistribution = latencyBucketer.NewCumulativeDistribution()
 	if err := dir.RegisterMetric("gateway-rtt", p.gatewayRttDistribution,
 		units.Millisecond, "round-trip time to gateway"); err != nil {
 		panic(err)
@@ -68,7 +68,7 @@ func (p *prober) findGateway() error {
 
 func intToIP(ip uint32) net.IP {
 	result := make(net.IP, 4)
-	for i, _ := range result {
+	for i := range result {
 		result[i] = byte(ip >> uint(8*i))
 	}
 	return result

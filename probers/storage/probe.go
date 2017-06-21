@@ -56,7 +56,7 @@ func (p *prober) processPartitionLine(line string) error {
 			return err
 		}
 	}
-	device.size = size
+	device.size = size << 10
 	device.probed = true
 	return nil
 }
