@@ -5,12 +5,13 @@ import (
 )
 
 type urlconfig struct {
-	testname   string
-	urlpath    string
-	urlport    int
-	healthy    bool
-	statusCode int
-	error      string
+	testname            string
+	urlpath             string
+	urlport             int
+	hasTricorderMetrics bool
+	healthy             bool
+	statusCode          int
+	error               string
 }
 
 func Makeurlprober(testname string, urlpath string, urlport int) *urlconfig {
@@ -23,6 +24,10 @@ func Makeurlprober(testname string, urlpath string, urlport int) *urlconfig {
 
 func (p *urlconfig) GetPort() uint {
 	return uint(p.urlport)
+}
+
+func (p *urlconfig) HasTricorderMetrics() bool {
+	return p.hasTricorderMetrics
 }
 
 func (p *urlconfig) HealthCheck() bool {
