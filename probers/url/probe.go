@@ -18,7 +18,7 @@ func (p *urlconfig) probe() error {
 		return err
 	}
 	defer res.Body.Close()
-	p.statusCode = res.StatusCode
+	p.statusCode = uint(res.StatusCode)
 	if res.StatusCode == 200 {
 		p.healthy = true
 		p.error = ""
@@ -45,7 +45,6 @@ func (p *urlconfig) probeTricorder() (bool, error) {
 		return false, err
 	}
 	defer res.Body.Close()
-	p.statusCode = res.StatusCode
 	if res.StatusCode == 200 {
 		return true, nil
 	}

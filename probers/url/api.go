@@ -7,14 +7,14 @@ import (
 type urlconfig struct {
 	testname            string
 	urlpath             string
-	urlport             int
+	urlport             uint
 	hasTricorderMetrics bool
 	healthy             bool
-	statusCode          int
+	statusCode          uint
 	error               string
 }
 
-func Makeurlprober(testname string, urlpath string, urlport int) *urlconfig {
+func Makeurlprober(testname string, urlpath string, urlport uint) *urlconfig {
 	p := new(urlconfig)
 	p.testname = testname
 	p.urlpath = urlpath
