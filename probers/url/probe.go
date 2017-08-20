@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const hasTricorderUrl = "/has-tricorder-metrics"
+
 func (p *urlconfig) probe() error {
 	address := fmt.Sprintf("http://localhost:%d%s", p.urlport, p.urlpath)
 	res, err := http.Get(address)
@@ -16,10 +18,13 @@ func (p *urlconfig) probe() error {
 		return err
 	}
 	defer res.Body.Close()
-	p.statusCode = res.StatusCode
+	p.statusCode = uint(res.StatusCode)
 	if res.StatusCode == 200 {
 		p.healthy = true
 		p.error = ""
+		if hasTricorderMetrics, err := p.probeTricorder(); err == nil {
+			p.hasTricorderMetrics = hasTricorderMetrics
+		}
 	} else {
 		p.healthy = false
 		p.error = res.Status
@@ -31,4 +36,17 @@ func (p *urlconfig) probe() error {
 		}
 	}
 	return nil
+}
+
+func (p *urlconfig) probeTricorder() (bool, error) {
+	address := fmt.Sprintf("http://localhost:%d%s", p.urlport, hasTricorderUrl)
+	res, err := http.Get(address)
+	if err != nil {
+		return false, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode == 200 {
+		return true, nil
+	}
+	return false, nil
 }

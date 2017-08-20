@@ -8,6 +8,10 @@ import (
 )
 
 func statusHandler(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		http.NotFound(w, req)
+		return
+	}
 	writer := bufio.NewWriter(w)
 	defer writer.Flush()
 	fmt.Fprintln(writer, "<title>System Health Agent status page</title>")

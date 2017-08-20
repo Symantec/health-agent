@@ -6,8 +6,16 @@ import (
 )
 
 func (p *urlconfig) register(dir *tricorder.DirectorySpec) error {
+	if err := dir.RegisterMetric("has-tricorder-metrics",
+		&p.hasTricorderMetrics, units.None, "Tricorder metrics?"); err != nil {
+		return err
+	}
 	if err := dir.RegisterMetric("healthy", &p.healthy,
 		units.None, "Healthy?"); err != nil {
+		return err
+	}
+	if err := dir.RegisterMetric("port-number",
+		&p.urlport, units.None, "Port number"); err != nil {
 		return err
 	}
 	if err := dir.RegisterMetric("status-code", &p.statusCode,

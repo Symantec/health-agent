@@ -29,7 +29,7 @@ type testConfig struct {
 type testSpecs struct {
 	Pathname   string
 	Urlpath    string `yaml:"url-path"`
-	Urlport    int    `yaml:"url-port"`
+	Urlport    uint   `yaml:"url-port"`
 	Hostname   string `yaml:"hostname"`
 	SssdConfig string `yaml:"sssd-config"`
 }
