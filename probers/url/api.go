@@ -8,6 +8,7 @@ type urlconfig struct {
 	testname            string
 	urlpath             string
 	urlport             uint
+	useTLS              bool
 	hasTricorderMetrics bool
 	healthy             bool
 	statusCode          uint
