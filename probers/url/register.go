@@ -6,6 +6,10 @@ import (
 )
 
 func (p *urlconfig) register(dir *tricorder.DirectorySpec) error {
+	if err := dir.RegisterMetric("error", &p.error,
+		units.None, "Error if any"); err != nil {
+		return err
+	}
 	if err := dir.RegisterMetric("has-tricorder-metrics",
 		&p.hasTricorderMetrics, units.None, "Tricorder metrics?"); err != nil {
 		return err
@@ -22,8 +26,8 @@ func (p *urlconfig) register(dir *tricorder.DirectorySpec) error {
 		units.None, "Status code"); err != nil {
 		return err
 	}
-	if err := dir.RegisterMetric("error", &p.error,
-		units.None, "Error if any"); err != nil {
+	if err := dir.RegisterMetric("use-tls",
+		&p.useTLS, units.None, "Connect with TLS?"); err != nil {
 		return err
 	}
 	return nil

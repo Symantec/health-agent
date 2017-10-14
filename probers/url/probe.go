@@ -1,6 +1,7 @@
 package url
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,9 +10,34 @@ import (
 
 const hasTricorderUrl = "/has-tricorder-metrics"
 
+var (
+	client = &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+	maybeHTTP  = "server gave HTTP response to HTTPS client"
+	maybeHTTPS = "malformed HTTP response"
+)
+
+func (p *urlconfig) getURL(path string) (*http.Response, error) {
+	var url string
+	if p.useTLS {
+		url = fmt.Sprintf("https://localhost:%d%s", p.urlport, path)
+	} else {
+		url = fmt.Sprintf("http://localhost:%d%s", p.urlport, path)
+	}
+	return client.Get(url)
+}
+
 func (p *urlconfig) probe() error {
-	address := fmt.Sprintf("http://localhost:%d%s", p.urlport, p.urlpath)
-	res, err := http.Get(address)
+	res, err := p.getURL(p.urlpath)
+	if err != nil {
+		if p.useTLS && strings.Contains(err.Error(), maybeHTTP) {
+			p.useTLS = false
+			res, err = p.getURL(p.urlpath)
+		} else if !p.useTLS && strings.Contains(err.Error(), maybeHTTPS) {
+			p.useTLS = true
+			res, err = p.getURL(p.urlpath)
+		}
+	}
 	if err != nil {
 		p.healthy = false
 		p.error = err.Error()
@@ -39,8 +65,7 @@ func (p *urlconfig) probe() error {
 }
 
 func (p *urlconfig) probeTricorder() (bool, error) {
-	address := fmt.Sprintf("http://localhost:%d%s", p.urlport, hasTricorderUrl)
-	res, err := http.Get(address)
+	res, err := p.getURL(hasTricorderUrl)
 	if err != nil {
 		return false, err
 	}
