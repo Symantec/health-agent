@@ -12,6 +12,6 @@ type HealthChecker interface {
 
 // DashboardYielder defines a type that can yield a dashboard.
 type DashboardYielder interface {
-	GetPort() uint
+	GetPort() (portNumber uint, useTLS bool)
 	HealthChecker
 }

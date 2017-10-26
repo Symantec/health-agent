@@ -23,8 +23,8 @@ func Makeurlprober(testname string, urlpath string, urlport uint) *urlconfig {
 	return p
 }
 
-func (p *urlconfig) GetPort() uint {
-	return uint(p.urlport)
+func (p *urlconfig) GetPort() (uint, bool) {
+	return uint(p.urlport), p.useTLS
 }
 
 func (p *urlconfig) HasTricorderMetrics() bool {

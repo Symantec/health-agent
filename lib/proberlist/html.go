@@ -32,17 +32,17 @@ func (pl *ProberList) writeHtml(writer io.Writer, req *http.Request) {
 	sort.Slice(dashboards, func(i, j int) bool {
 		return dashboards[i].name < dashboards[j].name
 	})
-	protocol := "http"
-	if req.TLS != nil {
-		protocol = "https"
-	}
 	host := strings.Split(req.Host, ":")[0]
 	for _, dashboard := range dashboards {
 		colour := "green"
 		if !dashboard.dashboardYielder.HealthCheck() {
 			colour = "red"
 		}
-		port := dashboard.dashboardYielder.GetPort()
+		port, useTLS := dashboard.dashboardYielder.GetPort()
+		protocol := "http"
+		if useTLS {
+			protocol = "https"
+		}
 		fmt.Fprintf(writer,
 			"<font color=\"%s\">%s</font> <a href=\"%s://%s:%d\">dashboard</a><br>\n",
 			colour, dashboard.name, protocol, host, port)
