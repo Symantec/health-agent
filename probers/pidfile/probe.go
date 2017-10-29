@@ -1,10 +1,8 @@
 package pidfile
 
 import (
-	"io/ioutil"
+	"fmt"
 	"os"
-	"strconv"
-	"strings"
 	"syscall"
 )
 
@@ -13,18 +11,21 @@ func (p *pidconfig) probe() error {
 		p.setpidfile(false)
 		return err
 	}
-	data, err := ioutil.ReadFile(p.pidfilepath)
+	file, err := os.Open(p.pidfilepath)
 	if err != nil {
 		p.setpid(false)
 		return err
 	}
-	pidstring := strings.TrimSpace(string(data))
-	pid, err := strconv.ParseInt(pidstring, 10, 64)
-	if err != nil {
+	defer file.Close()
+	var pid int
+	if nScanned, err := fmt.Fscanf(file, "%d", &pid); err != nil {
+		p.setpid(false)
+		return err
+	} else if nScanned != 1 {
 		p.setpid(false)
 		return err
 	}
-	process := os.Process{Pid: int(pid)}
+	process := os.Process{Pid: pid}
 	if err := process.Signal(syscall.Signal(0)); err != nil {
 		p.setpid(false)
 		return err
