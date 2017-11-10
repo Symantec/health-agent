@@ -3,15 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Symantec/Dominator/lib/logbuf"
-	"github.com/Symantec/health-agent/httpd"
-	"github.com/Symantec/tricorder/go/healthserver"
-	"log"
 	"net/rpc"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
+
+	"github.com/Symantec/Dominator/lib/log/serverlogger"
+	"github.com/Symantec/health-agent/httpd"
+	"github.com/Symantec/tricorder/go/healthserver"
 )
 
 var (
@@ -49,8 +49,7 @@ func doMain() error {
 	flag.Parse()
 	runtime.GOMAXPROCS(int(*maxThreads))
 	runtime.LockOSThread()
-	circularBuffer := logbuf.New()
-	logger := log.New(circularBuffer, "", log.LstdFlags)
+	logger := serverlogger.New("")
 	proberList, err := setupProbers()
 	if err != nil {
 		return err
@@ -60,13 +59,13 @@ func doMain() error {
 		return err
 	}
 	httpd.AddHtmlWriter(proberList)
-	httpd.AddHtmlWriter(circularBuffer)
+	httpd.AddHtmlWriter(logger)
 	sighupChannel := make(chan os.Signal)
 	signal.Notify(sighupChannel, syscall.SIGHUP)
 	sigtermChannel := make(chan os.Signal)
 	signal.Notify(sigtermChannel, syscall.SIGTERM, syscall.SIGINT)
 	rpc.HandleHTTP()
-	if err := httpd.StartServer(*portNum); err != nil {
+	if err := httpd.StartServer(*portNum, logger); err != nil {
 		return err
 	}
 	writePidfile()
