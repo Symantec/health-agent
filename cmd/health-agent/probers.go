@@ -12,11 +12,11 @@ import (
 	"github.com/Symantec/health-agent/probers/scheduler"
 	"github.com/Symantec/health-agent/probers/storage"
 	"github.com/Symantec/health-agent/probers/systime"
+	"github.com/Symantec/health-agent/probers/virsh"
 )
 
 func setupProbers() (*proberlist.ProberList, error) {
 	pl := proberlist.New("/probers")
-	go func() { pl.Add(aws.New(), "/sys/cloud/aws", 0) }()
 	pl.CreateAndAdd(filesystems.Register, "/sys/fs", 0)
 	pl.CreateAndAdd(scheduler.Register, "/sys/sched", 0)
 	pl.CreateAndAdd(memory.Register, "/sys/memory", 0)
@@ -26,5 +26,7 @@ func setupProbers() (*proberlist.ProberList, error) {
 	pl.CreateAndAdd(systime.Register, "/sys/systime", 0)
 	pl.CreateAndAdd(kernel.Register, "/sys/kernel", 0)
 	pl.CreateAndAdd(packages.Register, "/sys/packages", 0)
+	pl.Add(virsh.New(), "/sys/hypervisor/virsh", 0)
+	go func() { pl.Add(aws.New(), "/sys/cloud/aws", 0) }()
 	return pl, nil
 }
