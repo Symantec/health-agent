@@ -2,14 +2,17 @@
 
 echo=
 
-if [ -d /usr/lib/systemd/system ]; then
+if [ -x /bin/systemctl -a -d /lib/systemd/system ]; then
+    readonly init='systemd'
+    readonly destdir='/lib/systemd/system'
+elif [ -x /usr/bin/systemctl -a -d /usr/lib/systemd/system ]; then
     readonly init='systemd'
     readonly destdir='/usr/lib/systemd/system'
 elif [ -x /usr/sbin/update-rc.d ]; then
     readonly init='update-rc.d'
     if [ -d /etc/init.d ]; then
 	readonly destdir='/etc/init.d'
-    elif [ -d /etcrc.d/init.d ]; then
+    elif [ -d /etc/rc.d/init.d ]; then
 	readonly destdir='/etc/rc.d/init.d'
     fi
 elif [ -x /sbin/chkconfig ]; then
@@ -53,13 +56,13 @@ install_service ()
 {
     local -r service="$1"
 
-    if [ "$init" == 'systemd' ]; then
+    if [ "$init" = 'systemd' ]; then
 	$echo cp -p "init.d/${service}.service" "$destdir" || return
 	$echo systemctl enable "$service" || return
-    elif [ "$init" == 'update-rc.d' ]; then
+    elif [ "$init" = 'update-rc.d' ]; then
 	$echo cp -p "init.d/${service}.$(get_os)" "$destdir/$service" || return
 	$echo update-rc.d "$service" defaults || return
-    elif [ "$init" == 'chkconfig' ]; then
+    elif [ "$init" = 'chkconfig' ]; then
 	$echo cp -p "init.d/${service}.$(get_os)" "$destdir/$service" || return
 	$echo chkconfig --add "$service" || return
 	$echo chkconfig "$service" on || return
