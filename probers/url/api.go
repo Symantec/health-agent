@@ -1,6 +1,8 @@
 package url
 
 import (
+	"net/http"
+
 	"github.com/Symantec/tricorder/go/tricorder"
 )
 
@@ -12,19 +14,17 @@ type urlconfig struct {
 	hasTricorderMetrics bool
 	healthy             bool
 	statusCode          uint
+	httpTransport       *http.Transport
+	httpClient          *http.Client
 	error               string
 }
 
 func Makeurlprober(testname string, urlpath string, urlport uint) *urlconfig {
-	p := new(urlconfig)
-	p.testname = testname
-	p.urlpath = urlpath
-	p.urlport = urlport
-	return p
+	return newUrlProber(testname, urlpath, urlport)
 }
 
-func (p *urlconfig) GetPort() uint {
-	return uint(p.urlport)
+func (p *urlconfig) GetPort() (uint, bool) {
+	return uint(p.urlport), p.useTLS
 }
 
 func (p *urlconfig) HasTricorderMetrics() bool {

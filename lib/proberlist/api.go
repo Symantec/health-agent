@@ -1,13 +1,14 @@
 package proberlist
 
 import (
-	"github.com/Symantec/health-agent/lib/prober"
-	"github.com/Symantec/tricorder/go/tricorder"
 	"io"
-	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/Symantec/Dominator/lib/log"
+	"github.com/Symantec/health-agent/lib/prober"
+	"github.com/Symantec/tricorder/go/tricorder"
 )
 
 // HtmlWriter defines a type that can write a HTML snippet about itself.
@@ -76,7 +77,7 @@ func (pl *ProberList) RequestWriteHtml(writer io.Writer, req *http.Request) {
 // infinite loop. The default probe interval in seconds is given by
 // defaultProbeInterval. The logger will be used to log problems.
 func (pl *ProberList) StartProbing(defaultProbeInterval uint,
-	logger *log.Logger) {
+	logger log.Logger) {
 	pl.startProbing(defaultProbeInterval, logger)
 }
 

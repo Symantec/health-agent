@@ -1,7 +1,14 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/Symantec/Dominator/lib/fsutil"
+	"github.com/Symantec/Dominator/lib/log"
 	libprober "github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/health-agent/lib/proberlist"
 	dnsprober "github.com/Symantec/health-agent/probers/dns"
@@ -12,12 +19,6 @@ import (
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
-	"strings"
-	"time"
 )
 
 type testConfig struct {
@@ -35,7 +36,7 @@ type testSpecs struct {
 }
 
 func setupHealthchecks(configDir string, pl *proberlist.ProberList,
-	logger *log.Logger) error {
+	logger log.Logger) error {
 	topDir := "/health-checks"
 	configdir, err := os.Open(path.Join(configDir, "tests.d"))
 	defer configdir.Close()
@@ -106,7 +107,7 @@ func setupHealthchecks(configDir string, pl *proberlist.ProberList,
 }
 
 func makeProber(testname string, c *testConfig,
-	logger *log.Logger) proberlist.RegisterProber {
+	logger log.Logger) proberlist.RegisterProber {
 	switch c.Testtype {
 	case "dns":
 		hostname := c.Specs.Hostname

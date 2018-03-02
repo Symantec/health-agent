@@ -81,7 +81,7 @@ func (p *prober) processNetdevLine(line string) error {
 			"compressed packets received"); err != nil {
 			return err
 		}
-		if err := netIf.dir.RegisterMetric("rx-data", &netIf.rxData,
+		if err := netIf.dir.RegisterMetric("rx-data", &netIf.rxData.value,
 			units.Byte, "bytes received"); err != nil {
 			return err
 		}
@@ -102,7 +102,7 @@ func (p *prober) processNetdevLine(line string) error {
 			units.None, "receive overrun errors"); err != nil {
 			return err
 		}
-		if err := netIf.dir.RegisterMetric("rx-packets", &netIf.rxPackets,
+		if err := netIf.dir.RegisterMetric("rx-packets", &netIf.rxPackets.value,
 			units.None, "total packets received"); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func (p *prober) processNetdevLine(line string) error {
 			"compressed packets transmitted"); err != nil {
 			return err
 		}
-		if err := netIf.dir.RegisterMetric("tx-data", &netIf.txData,
+		if err := netIf.dir.RegisterMetric("tx-data", &netIf.txData.value,
 			units.Byte, "bytes transmitted"); err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ func (p *prober) processNetdevLine(line string) error {
 			units.None, "transmit overrun errors"); err != nil {
 			return err
 		}
-		if err := netIf.dir.RegisterMetric("tx-packets", &netIf.txPackets,
+		if err := netIf.dir.RegisterMetric("tx-packets", &netIf.txPackets.value,
 			units.None, "total packets transmitted"); err != nil {
 			return err
 		}
@@ -153,11 +153,12 @@ func (p *prober) processNetdevLine(line string) error {
 	netIf.probed = true
 	nScanned, err := fmt.Sscanf(netIfData,
 		"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-		&netIf.rxData, &netIf.rxPackets, &netIf.rxErrors, &netIf.rxDropped,
-		&netIf.rxOverruns, &netIf.rxFrameErrors, &netIf.rxCompressedPackets,
+		&netIf.rxData.tmp, &netIf.rxPackets.tmp, &netIf.rxErrors,
+		&netIf.rxDropped, &netIf.rxOverruns, &netIf.rxFrameErrors,
+		&netIf.rxCompressedPackets,
 		&netIf.multicastFrames,
-		&netIf.txData, &netIf.txPackets, &netIf.rxErrors, &netIf.txDropped,
-		&netIf.txOverruns, &netIf.txCollisionErrors,
+		&netIf.txData.tmp, &netIf.txPackets.tmp, &netIf.rxErrors,
+		&netIf.txDropped, &netIf.txOverruns, &netIf.txCollisionErrors,
 		&netIf.txCarrierLosses, &netIf.txCompressedPackets)
 	if err != nil {
 		return err
@@ -166,19 +167,31 @@ func (p *prober) processNetdevLine(line string) error {
 		return errors.New(fmt.Sprintf("only read %d values from %s",
 			nScanned, line))
 	}
+	// Handle integer overflow.
+	netIf.rxData.update()
+	netIf.rxPackets.update()
+	netIf.txData.update()
+	netIf.txPackets.update()
 	netIf.carrier, err = readSysfsBool(netIfName, "carrier")
 	currentTime := time.Now()
 	if !netIf.lastProbeTime.IsZero() {
 		duration := currentTime.Sub(netIf.lastProbeTime)
-		netIf.rxDataRate = uint64(float64(netIf.rxData-netIf.lastRxData) /
+		netIf.rxDataRate = uint64(float64(netIf.rxData.value-netIf.lastRxData) /
 			duration.Seconds())
-		netIf.txDataRate = uint64(float64(netIf.txData-netIf.lastTxData) /
+		netIf.txDataRate = uint64(float64(netIf.txData.value-netIf.lastTxData) /
 			duration.Seconds())
 	}
 	netIf.lastProbeTime = currentTime
-	netIf.lastRxData = netIf.rxData
-	netIf.lastTxData = netIf.txData
+	netIf.lastRxData = netIf.rxData.value
+	netIf.lastTxData = netIf.txData.value
 	return nil
+}
+
+func (wi *wrappingInt) update() {
+	if wi.offset+wi.tmp < wi.value {
+		wi.offset += 1 << 32
+	}
+	wi.value = wi.offset + wi.tmp
 }
 
 func readSysfsUint64(netIfName, filename string) (uint64, error) {

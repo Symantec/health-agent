@@ -1,7 +1,6 @@
 package url
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,8 +10,6 @@ import (
 const hasTricorderUrl = "/has-tricorder-metrics"
 
 var (
-	client = &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 	maybeHTTP  = "server gave HTTP response to HTTPS client"
 	maybeHTTPS = "malformed HTTP response"
 )
@@ -24,10 +21,11 @@ func (p *urlconfig) getURL(path string) (*http.Response, error) {
 	} else {
 		url = fmt.Sprintf("http://localhost:%d%s", p.urlport, path)
 	}
-	return client.Get(url)
+	return p.httpClient.Get(url)
 }
 
 func (p *urlconfig) probe() error {
+	defer p.httpTransport.CloseIdleConnections()
 	res, err := p.getURL(p.urlpath)
 	if err != nil {
 		if p.useTLS && strings.Contains(err.Error(), maybeHTTP) {
@@ -43,7 +41,8 @@ func (p *urlconfig) probe() error {
 		p.error = err.Error()
 		return err
 	}
-	defer res.Body.Close()
+	body, bodyErr := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	p.statusCode = uint(res.StatusCode)
 	if res.StatusCode == 200 {
 		p.healthy = true
@@ -54,7 +53,7 @@ func (p *urlconfig) probe() error {
 	} else {
 		p.healthy = false
 		p.error = res.Status
-		if body, err := ioutil.ReadAll(res.Body); err == nil {
+		if bodyErr == nil {
 			status := strings.TrimSpace(string(body))
 			if status != "" {
 				p.error = status
@@ -69,7 +68,8 @@ func (p *urlconfig) probeTricorder() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer res.Body.Close()
+	ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	if res.StatusCode == 200 {
 		return true, nil
 	}

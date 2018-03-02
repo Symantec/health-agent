@@ -1,12 +1,13 @@
 package proberlist
 
 import (
+	"path"
+	"time"
+
+	"github.com/Symantec/Dominator/lib/log"
 	"github.com/Symantec/health-agent/lib/prober"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
-	"log"
-	"path"
-	"time"
 )
 
 var (
@@ -83,7 +84,7 @@ func (pl *ProberList) getProbers() []*proberType {
 }
 
 func (pl *ProberList) startProbing(defaultProbeInterval uint,
-	logger *log.Logger) {
+	logger log.Logger) {
 	for _, p := range pl.getProbers() {
 		if p.probeInterval > 0 {
 			go p.proberLoop(defaultProbeInterval, logger)
@@ -92,7 +93,7 @@ func (pl *ProberList) startProbing(defaultProbeInterval uint,
 	go pl.proberLoop(defaultProbeInterval, logger)
 }
 
-func (pl *ProberList) proberLoop(probeInterval uint, logger *log.Logger) {
+func (pl *ProberList) proberLoop(probeInterval uint, logger log.Logger) {
 	for {
 		probeStartTime := time.Now()
 		pl.probe(logger)
@@ -101,7 +102,7 @@ func (pl *ProberList) proberLoop(probeInterval uint, logger *log.Logger) {
 	}
 }
 
-func (pl *ProberList) probe(logger *log.Logger) {
+func (pl *ProberList) probe(logger log.Logger) {
 	// TODO: Possible data races with tricorder. Assigning a time
 	// is not atomic.
 	pl.probeStartTime = time.Now()
@@ -118,7 +119,7 @@ func (pl *ProberList) probe(logger *log.Logger) {
 	pl.probeTimeDistribution.Add(time.Since(pl.probeStartTime))
 }
 
-func (p *proberType) proberLoop(defaultProbeInterval uint, logger *log.Logger) {
+func (p *proberType) proberLoop(defaultProbeInterval uint, logger log.Logger) {
 	// Set the initial probe interval to the global default, if less than the
 	// interval for this prober. The probe interval will be gradually increased
 	// until the target probe interval is reached. This gives faster probing at

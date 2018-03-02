@@ -1,9 +1,29 @@
 package url
 
 import (
+	"crypto/tls"
+	"net/http"
+	"time"
+
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
 )
+
+func newUrlProber(testname string, urlpath string, urlport uint) *urlconfig {
+	httpTransport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	return &urlconfig{
+		testname:      testname,
+		urlpath:       urlpath,
+		urlport:       urlport,
+		httpTransport: httpTransport,
+		httpClient: &http.Client{
+			Transport: httpTransport,
+			Timeout:   time.Second * 10,
+		},
+	}
+}
 
 func (p *urlconfig) register(dir *tricorder.DirectorySpec) error {
 	if err := dir.RegisterMetric("error", &p.error,
