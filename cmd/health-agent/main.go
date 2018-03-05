@@ -12,6 +12,7 @@ import (
 	"github.com/Symantec/Dominator/lib/log/serverlogger"
 	"github.com/Symantec/health-agent/httpd"
 	"github.com/Symantec/tricorder/go/healthserver"
+	"github.com/Symantec/tricorder/go/tricorder"
 )
 
 var (
@@ -47,6 +48,7 @@ func writePidfile() {
 
 func doMain() error {
 	flag.Parse()
+	tricorder.RegisterFlags()
 	runtime.GOMAXPROCS(int(*maxThreads))
 	runtime.LockOSThread()
 	logger := serverlogger.New("")
