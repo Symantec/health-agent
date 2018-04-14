@@ -7,11 +7,20 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/Symantec/Dominator/lib/net/util"
+	"github.com/Symantec/tricorder/go/tricorder"
 )
 
 var pingName string = "ping"
 
 func (p *prober) probe() error {
+	if err := p.probeGateway(); err != nil {
+		return err
+	}
+	if err := p.probeResolver(); err != nil {
+		return err
+	}
 	cmd := exec.Command(pingName, "-c", "1", "-W", "5", p.gatewayAddress)
 	timeStart := time.Now()
 	stdout, err := cmd.Output()
@@ -39,4 +48,30 @@ func (p *prober) probe() error {
 	// Unable to parse output from ping(8), so use the ping time.
 	p.gatewayRttDistribution.Add(pingTime)
 	return nil
+}
+
+func (p *prober) probeGateway() error {
+	if defaultRoute, err := util.GetDefaultRoute(); err != nil {
+		return err
+	} else {
+		p.gatewayAddress = defaultRoute.Address.String()
+		p.gatewayInterfaceName = defaultRoute.Interface
+		return nil
+	}
+}
+
+func (p *prober) probeResolver() error {
+	if resolver, err := util.GetResolverConfiguration(); err != nil {
+		return err
+	} else {
+		p.resolverDomain = resolver.Domain
+		nameservers := make([]string, 0, len(resolver.Nameservers))
+		for _, nameserverIP := range resolver.Nameservers {
+			nameservers = append(nameservers, nameserverIP.String())
+		}
+		p.resolverNameservers.Change(nameservers, tricorder.ImmutableSlice)
+		p.resolverSearchDomains.Change(resolver.SearchDomains,
+			tricorder.ImmutableSlice)
+		return nil
+	}
 }

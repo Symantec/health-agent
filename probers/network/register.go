@@ -1,21 +1,12 @@
 package network
 
 import (
-	"bufio"
-	"fmt"
 	"github.com/Symantec/tricorder/go/tricorder"
 	"github.com/Symantec/tricorder/go/tricorder/units"
-	"net"
-	"os"
 )
-
-var filename string = "/proc/net/route"
 
 func register(dir *tricorder.DirectorySpec) *prober {
 	p := new(prober)
-	if err := p.findGateway(); err != nil {
-		panic(err)
-	}
 	if err := dir.RegisterMetric("gateway-address", &p.gatewayAddress,
 		units.None, "gateway address"); err != nil {
 		panic(err)
@@ -36,40 +27,26 @@ func register(dir *tricorder.DirectorySpec) *prober {
 		units.Millisecond, "round-trip time to gateway"); err != nil {
 		panic(err)
 	}
-	return p
-}
-
-func (p *prober) findGateway() error {
-	file, err := os.Open(filename)
+	resolverDir, err := dir.RegisterDirectory("dns-resolver")
 	if err != nil {
-		return err
+		panic(err)
 	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		var interfaceName string
-		var destAddr, gatewayAddr, flags, mask uint32
-		var ign int
-		nCopied, err := fmt.Sscanf(scanner.Text(),
-			"%s %x %x %x %d %d %d %x %d %d %d",
-			&interfaceName, &destAddr, &gatewayAddr, &flags, &ign, &ign, &ign,
-			&mask, &ign, &ign, &ign)
-		if err != nil || nCopied < 11 {
-			continue
-		}
-		if destAddr == 0 && flags&0x2 == 0x2 && flags&0x1 == 0x1 {
-			p.gatewayAddress = intToIP(gatewayAddr).String()
-			p.gatewayInterfaceName = interfaceName
-			return nil
-		}
+	if err := resolverDir.RegisterMetric("domain", &p.resolverDomain,
+		units.None, "default domain name"); err != nil {
+		panic(err)
 	}
-	return scanner.Err()
-}
-
-func intToIP(ip uint32) net.IP {
-	result := make(net.IP, 4)
-	for i := range result {
-		result[i] = byte(ip >> uint(8*i))
+	p.resolverNameservers = tricorder.NewList([]string{},
+		tricorder.ImmutableSlice)
+	if err := resolverDir.RegisterMetric("nameservers", p.resolverNameservers,
+		units.None, "resolvers"); err != nil {
+		panic(err)
 	}
-	return result
+	p.resolverSearchDomains = tricorder.NewList([]string{},
+		tricorder.ImmutableSlice)
+	if err := resolverDir.RegisterMetric("search-domains",
+		p.resolverSearchDomains, units.None,
+		"domains (zones) to search"); err != nil {
+		panic(err)
+	}
+	return p
 }
