@@ -10,6 +10,9 @@ type prober struct {
 	gatewayInterfaceName        string
 	gatewayPingTimeDistribution *tricorder.CumulativeDistribution
 	gatewayRttDistribution      *tricorder.CumulativeDistribution
+	resolverDomain              string
+	resolverNameservers         *tricorder.List
+	resolverSearchDomains       *tricorder.List
 }
 
 func Register(dir *tricorder.DirectorySpec) libprober.Prober {
