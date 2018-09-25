@@ -7,6 +7,7 @@ import (
 
 type prober struct {
 	dir            *tricorder.DirectorySpec
+	health         string
 	storageDevices map[string]*storageDevice // map[name]*storageDevice
 }
 
