@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/Symantec/Dominator/lib/html"
 	"github.com/Symantec/Dominator/lib/log"
 	"github.com/Symantec/Dominator/lib/net/reverseconnection"
 	"github.com/Symantec/tricorder/go/tricorder"
@@ -29,8 +30,8 @@ func StartServer(portNum uint, logger log.DebugLogger) error {
 	if err != nil {
 		return err
 	}
-	http.HandleFunc("/", statusHandler)
-	http.HandleFunc("/favicon.ico", func(http.ResponseWriter, *http.Request) {})
+	html.HandleFunc("/", statusHandler)
+	html.HandleFunc("/favicon.ico", func(http.ResponseWriter, *http.Request) {})
 	go http.Serve(listener, nil)
 	return nil
 }
