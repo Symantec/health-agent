@@ -81,6 +81,8 @@ func doMain() error {
 				logger.Printf("Unable to Exec:%s\t%s\n", os.Args[0], err)
 			}
 		case <-sigtermChannel:
+			logger.Println("Caught SIGTERM: exiting cleanly")
+			logger.Flush()
 			gracefulCleanup()
 		}
 	}
