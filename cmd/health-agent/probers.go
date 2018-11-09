@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Symantec/health-agent/lib/proberlist"
 	"github.com/Symantec/health-agent/probers/aws"
+	"github.com/Symantec/health-agent/probers/dmi"
 	"github.com/Symantec/health-agent/probers/filesystems"
 	"github.com/Symantec/health-agent/probers/kernel"
 	"github.com/Symantec/health-agent/probers/memory"
@@ -21,6 +22,7 @@ func setupProbers() (*proberlist.ProberList, error) {
 	pl.CreateAndAdd(scheduler.Register, "/sys/sched", 0)
 	pl.CreateAndAdd(memory.Register, "/sys/memory", 0)
 	pl.CreateAndAdd(netif.Register, "/sys/netif", 0)
+	pl.CreateAndAdd(dmi.Register, "/sys/dmi", 0)
 	pl.CreateAndAdd(network.Register, "/sys/network", 0)
 	pl.CreateAndAdd(storage.Register, "/sys/storage", 0)
 	pl.CreateAndAdd(systime.Register, "/sys/systime", 0)
