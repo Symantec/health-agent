@@ -2,7 +2,6 @@ package filesystems
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"github.com/Symantec/tricorder/go/tricorder/units"
 	"os"
@@ -40,13 +39,21 @@ func (p *prober) processMountLine(line string) error {
 		return err
 	}
 	if nScanned < 4 {
-		return errors.New(fmt.Sprintf("only read %d values from %s",
-			nScanned, line))
+		return fmt.Errorf("only read %d values from %s", nScanned, line)
 	}
 	if !strings.HasPrefix(device, "/dev/") {
-		return nil
+		return nil // Not a device: ignore.
 	}
 	device = device[5:]
+	var statbuf syscall.Statfs_t
+	if fd, err := syscall.Open(mountPoint, syscall.O_RDONLY, 0); err != nil {
+		return fmt.Errorf("error opening: %s %s", mountPoint, err)
+	} else {
+		defer syscall.Close(fd)
+		if err := syscall.Fstatfs(fd, &statbuf); err != nil {
+			return nil // Something weird like FUSE: ignore.
+		}
+	}
 	fs := p.fileSystems[device]
 	if fs == nil {
 		fs = new(fileSystem)
@@ -92,18 +99,9 @@ func (p *prober) processMountLine(line string) error {
 	if fs.probed {
 		return nil
 	}
-	if fd, err := syscall.Open(mountPoint, syscall.O_RDONLY, 0); err != nil {
-		return errors.New(fmt.Sprintf("error opening: %s %s", mountPoint, err))
-	} else {
-		defer syscall.Close(fd)
-		var statbuf syscall.Statfs_t
-		if err := syscall.Fstatfs(fd, &statbuf); err != nil {
-			return err
-		}
-		fs.available = statbuf.Bavail * uint64(statbuf.Bsize)
-		fs.free = statbuf.Bfree * uint64(statbuf.Bsize)
-		fs.size = statbuf.Blocks * uint64(statbuf.Bsize)
-	}
+	fs.available = statbuf.Bavail * uint64(statbuf.Bsize)
+	fs.free = statbuf.Bfree * uint64(statbuf.Bsize)
+	fs.size = statbuf.Blocks * uint64(statbuf.Bsize)
 	fs.device = device
 	fs.options = fsOptions
 	fs.writable = strings.HasPrefix(fs.options, "rw,")
