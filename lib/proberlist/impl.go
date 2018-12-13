@@ -112,7 +112,7 @@ func (pl *ProberList) probe(logger log.Logger) {
 		}
 		startTime := time.Now()
 		if err := p.prober.Probe(); err != nil {
-			logger.Println(err)
+			logger.Printf("probe failure for: %s: %s\n", p.name, err)
 		}
 		p.probeTimeDistribution.Add(time.Since(startTime))
 	}
@@ -131,7 +131,7 @@ func (p *proberType) proberLoop(defaultProbeInterval uint, logger log.Logger) {
 	for {
 		p.probeStartTime = time.Now()
 		if err := p.prober.Probe(); err != nil {
-			logger.Println(err)
+			logger.Printf("probe failure for: %s: %s\n", p.name, err)
 		}
 		probeDuration := time.Since(p.probeStartTime)
 		p.probeTimeDistribution.Add(probeDuration)
