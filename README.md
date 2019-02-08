@@ -1,4 +1,7 @@
 # System Health Node Agent
+[![Build Status](https://travis-ci.org/Symantec/health-agent.svg?branch=master)](https://travis-ci.org/Symantec/health-agent)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Symantec/health-agent)](https://goreportcard.com/report/github.com/Symantec/health-agent)
+
 This is a lightweight agent that probes the local machine for metrics and
 health data and publishes them via a human-readable HTTP page and via a
 REST/JSON API and Go RPC.

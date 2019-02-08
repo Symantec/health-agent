@@ -57,7 +57,7 @@ func doMain() error {
 		return err
 	}
 	if err := setupHealthchecks(*configDir, proberList, logger); err != nil {
-		logger.Printf("Error occured while setting up Healthchecks")
+		logger.Printf("Error occurred while setting up Healthchecks")
 		return err
 	}
 	httpd.AddHtmlWriter(proberList)
@@ -86,7 +86,6 @@ func doMain() error {
 			gracefulCleanup()
 		}
 	}
-	return nil
 }
 
 func main() {

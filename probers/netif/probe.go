@@ -2,7 +2,6 @@ package netif
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"github.com/Symantec/tricorder/go/tricorder/units"
 	"os"
@@ -164,15 +163,14 @@ func (p *prober) processNetdevLine(line string) error {
 		return err
 	}
 	if nScanned < 16 {
-		return errors.New(fmt.Sprintf("only read %d values from %s",
-			nScanned, line))
+		return fmt.Errorf("only read %d values from %s", nScanned, line)
 	}
 	// Handle integer overflow.
 	netIf.rxData.update()
 	netIf.rxPackets.update()
 	netIf.txData.update()
 	netIf.txPackets.update()
-	netIf.carrier, err = readSysfsBool(netIfName, "carrier")
+	netIf.carrier, _ = readSysfsBool(netIfName, "carrier")
 	currentTime := time.Now()
 	if !netIf.lastProbeTime.IsZero() {
 		duration := currentTime.Sub(netIf.lastProbeTime)
@@ -207,8 +205,7 @@ func readSysfsUint64(netIfName, filename string) (uint64, error) {
 		return 0, err
 	}
 	if nScanned < 1 {
-		return 0, errors.New(fmt.Sprintf("only read %d values from: %s",
-			nScanned, filename))
+		return 0, fmt.Errorf("only read %d values from: %s", nScanned, filename)
 	}
 	return value, nil
 }
@@ -226,8 +223,8 @@ func readSysfsBool(netIfName, filename string) (bool, error) {
 		return false, err
 	}
 	if nScanned < 1 {
-		return false, errors.New(fmt.Sprintf("only read %d values from: %s",
-			nScanned, filename))
+		return false, fmt.Errorf("only read %d values from: %s",
+			nScanned, filename)
 	}
 	if ivalue == 0 {
 		return false, nil
@@ -248,8 +245,8 @@ func readSysfsString(netIfName, filename string) (string, error) {
 		return "", err
 	}
 	if nScanned < 1 {
-		return "", errors.New(fmt.Sprintf("only read %d values from: %s",
-			nScanned, filename))
+		return "", fmt.Errorf("only read %d values from: %s",
+			nScanned, filename)
 	}
 	return value, nil
 }
