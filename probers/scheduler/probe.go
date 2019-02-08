@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -38,8 +37,8 @@ func (p *prober) probeLoadavg() error {
 		return err
 	}
 	if nScanned < 3 {
-		return errors.New(fmt.Sprintf("only read %d values from %s",
-			nScanned, loadavgFilename))
+		return fmt.Errorf("only read %d values from %s",
+			nScanned, loadavgFilename)
 	}
 	return nil
 }
